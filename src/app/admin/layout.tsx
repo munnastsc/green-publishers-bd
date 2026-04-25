@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, Book, Layers, Users, Building, 
-  Menu as MenuIcon, Video, ShoppingCart, LogOut, Home, Eye, Image as ImageIcon
+  Menu as MenuIcon, Video, ShoppingCart, LogOut, Home, Eye, Image as ImageIcon, Tag
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
