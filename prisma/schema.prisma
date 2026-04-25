@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("USER") // ADMIN, USER
+  orders    Order[]
+  reviews   Review[]
+  wishlist  WishlistItem[]
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  nameEn    String
+  nameBn    String
+  books     Book[]
+  createdAt DateTime @default(now())
+}
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  nameEn    String
+  nameBn    String
+  books     Book[]
+  createdAt DateTime @default(now())
+}
+
+model Publisher {
+  id        Int      @id @default(autoincrement())
+  nameEn    String
+  nameBn    String
+  books     Book[]
+  createdAt DateTime @default(now())
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  titleEn       String
+  titleBn       String
+  description   String?
+  price         Float
+  originalPrice Float?
+  imageUrl      String?
+  
+  categoryId    Int?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  
+  authorId      Int?
+  author        Author?   @relation(fields: [authorId], references: [id])
+  
+  publisherId   Int?
+  publisher     Publisher? @relation(fields: [publisherId], references: [id])
+
+  videos        Video[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  
+  createdAt DateTime @default(now())
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, bookId])
+}
+
+model Coupon {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique
+  discountType String   // PERCENTAGE or FIXED
+  value        Float
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Video {
+  id          Int      @id @default(autoincrement())
+  titleEn     String
+  titleBn     String
+  youtubeId   String
+  description String?
+  
+  bookId      Int?
+  book        Book?    @relation(fields: [bookId], references: [id])
+  
+  categoryId  Int?
+  createdAt   DateTime @default(now())
+}
+
+model MenuItem {
+  id        Int      @id @default(autoincrement())
+  labelEn   String
+  labelBn   String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  customerName  String
+  customerPhone String
+  address       String
+  totalAmount   Float
+  status        String   @default("PENDING")
+  items         String   
+  
+  userId        Int?
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  createdAt     DateTime @default(now())
+}
+
+model HomeSection {
+  id        Int      @id @default(autoincrement())
+  titleEn   String
+  titleBn   String
+  type      String   // e.g., "LATEST", "CATEGORY"
+  targetId  Int?     // Category ID if type is CATEGORY
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  titleEn   String?
+  titleBn   String?
+  subtitleEn String?
+  subtitleBn String?
+  imageUrl  String
+  link      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
