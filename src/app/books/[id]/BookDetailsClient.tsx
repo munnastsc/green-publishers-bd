@@ -3,12 +3,14 @@
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
 import { BookOpen, ShoppingCart, Star, Share2, Check, ShieldCheck, Truck, RefreshCcw, Heart, PlayCircle, MessageSquare, Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function BookDetailsClient({ book, relatedBooks, videos }: { book: any, relatedBooks: any[], videos: any[] }) {
   const { lang, t } = useLanguage();
   const { addToCart } = useCart();
+  const router = useRouter();
   const [added, setAdded] = useState(false);
   
   const [user, setUser] = useState<any>(null);
