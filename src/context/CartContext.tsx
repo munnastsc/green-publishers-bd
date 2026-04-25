@@ -8,6 +8,9 @@ type CartItem = {
   titleBn: string;
   price: number;
   quantity: number;
+  imageUrl?: string | null;
+  authorNameEn?: string | null;
+  authorNameBn?: string | null;
 };
 
 type CartContextType = {
@@ -49,7 +52,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         titleEn: book.titleEn, 
         titleBn: book.titleBn, 
         price: book.price, 
-        quantity: 1 
+        quantity: 1,
+        imageUrl: book.imageUrl,
+        authorNameEn: book.author?.nameEn,
+        authorNameBn: book.author?.nameBn
       }];
     });
   };

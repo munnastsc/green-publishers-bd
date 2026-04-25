@@ -55,7 +55,7 @@ export default function CartPage() {
                 </div>
                 <div>
                   <h4 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0, color: '#1e293b' }}>{lang === 'en' ? item.titleEn : item.titleBn}</h4>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0' }}>{lang === 'en' ? item.author?.nameEn : item.author?.nameBn}</p>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0' }}>{lang === 'en' ? item.authorNameEn : item.authorNameBn}</p>
                 </div>
               </div>
               
