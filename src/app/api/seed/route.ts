@@ -39,8 +39,7 @@ export async function GET() {
                 titleEn: 'Sample Book',
                 titleBn: 'নমুনা বই',
                 price: 250,
-                description: 'Demo description',
-                type: 'LATEST'
+                description: 'Demo description'
             }
         });
     }
