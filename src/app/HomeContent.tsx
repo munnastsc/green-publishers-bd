@@ -25,7 +25,7 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
       <div className="container" style={{ margin: '1rem auto' }}>
         {banners && banners.length > 0 ? (
           banners.map((banner) => (
-            <Link key={banner.id} href={banner.link || '#'} style={{ textDecoration: 'none', display: 'block', marginBottom: '1rem' }}>
+            <Link key={banner.id} href={banner.link && banner.link.startsWith('http') ? banner.link.replace(/https?:\/\/localhost:3000/, '') : (banner.link || '#')} style={{ textDecoration: 'none', display: 'block', marginBottom: '1rem' }}>
               <div style={{ 
                 width: '100%', 
                 height: '350px', 
