@@ -5,6 +5,10 @@ export const metadata = {
   title: 'Books - Green Publishers BD',
 };
 
+export const dynamic = 'force-dynamic';
+
+import { Suspense } from 'react';
+
 export default async function BooksPage() {
   const books = await prisma.book.findMany({
     orderBy: { createdAt: 'desc' },
@@ -14,5 +18,9 @@ export default async function BooksPage() {
   const categories = await prisma.category.findMany();
   const authors = await prisma.author.findMany();
 
-  return <BooksClient books={books} categories={categories} authors={authors} />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BooksClient books={books} categories={categories} authors={authors} />
+    </Suspense>
+  );
 }
