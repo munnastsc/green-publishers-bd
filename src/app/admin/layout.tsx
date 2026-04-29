@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Book, Layers, Users, Building,
-  Menu as MenuIcon, Video, ShoppingCart, LogOut, Eye, Image as ImageIcon, Tag, Settings
+  Menu as MenuIcon, Video, ShoppingCart, LogOut, Eye, Image as ImageIcon, Tag, Settings, Headphones
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -41,6 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Nav Menus', icon: <MenuIcon size={18} />, href: '/admin/menus' },
     { label: 'Home Sections', icon: <Layers size={18} />, href: '/admin/home-sections' },
     { label: 'Videos', icon: <Video size={18} />, href: '/admin/videos' },
+    { label: 'Audio Lessons', icon: <Headphones size={18} />, href: '/admin/audio' },
     { label: 'Banners', icon: <ImageIcon size={18} />, href: '/admin/banners' },
     { label: 'Orders', icon: <ShoppingCart size={18} />, href: '/admin/orders' },
     { label: 'Coupons', icon: <Tag size={18} />, href: '/admin/coupons' },

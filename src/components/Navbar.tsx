@@ -47,6 +47,7 @@ export default function Navbar() {
     { id: 1, labelEn: 'Books', labelBn: 'বইসমূহ', url: '/books' },
     { id: 2, labelEn: 'Authors', labelBn: 'লেখক', url: '/authors' },
     { id: 3, labelEn: 'Videos', labelBn: 'ভিডিও', url: '/videos' },
+    { id: 4, labelEn: 'Audio', labelBn: 'অডিও', url: '/audio' },
   ];
 
   return (

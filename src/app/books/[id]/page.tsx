@@ -28,15 +28,22 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ id
   try {
     const p = prisma as any;
     if (p.video) {
-      // We fetch all and filter in JS to avoid "Unknown argument bookId" validation error
-      const allVideos = await p.video.findMany({
-        orderBy: { createdAt: 'asc' }
-      });
-      // Filter manually in case the 'bookId' field exists in DB but not in Typescript/Validation layer
+      const allVideos = await p.video.findMany({ orderBy: { createdAt: 'asc' } });
       videos = allVideos.filter((v: any) => v.bookId === bookId);
     }
   } catch (e) {
     console.error("Failed to fetch videos safely:", e);
+  }
+
+  let audioLessons: any[] = [];
+  try {
+    const p = prisma as any;
+    if (p.audioLesson) {
+      const allAudio = await p.audioLesson.findMany({ orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
+      audioLessons = allAudio.filter((a: any) => a.bookId === bookId);
+    }
+  } catch (e) {
+    console.error("Failed to fetch audio lessons:", e);
   }
 
   // Fetch related books
@@ -54,5 +61,5 @@ export default async function BookDetailsPage({ params }: { params: Promise<{ id
     console.error("Failed to fetch related books:", e);
   }
 
-  return <BookDetailsClient book={book} relatedBooks={relatedBooks} videos={videos} />;
+  return <BookDetailsClient book={book} relatedBooks={relatedBooks} videos={videos} audioLessons={audioLessons} />;
 }

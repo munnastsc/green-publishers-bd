@@ -2,12 +2,13 @@
 
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
-import { BookOpen, ShoppingCart, Star, Share2, Check, ShieldCheck, Truck, RefreshCcw, Heart, PlayCircle, MessageSquare, Send, ExternalLink } from 'lucide-react';
+import { BookOpen, ShoppingCart, Star, Share2, Check, ShieldCheck, Truck, RefreshCcw, Heart, PlayCircle, MessageSquare, Send, ExternalLink, Headphones } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import AudioPlayer from '@/components/AudioPlayer';
 
-export default function BookDetailsClient({ book, relatedBooks, videos }: { book: any, relatedBooks: any[], videos: any[] }) {
+export default function BookDetailsClient({ book, relatedBooks, videos, audioLessons }: { book: any, relatedBooks: any[], videos: any[], audioLessons?: any[] }) {
   const { lang } = useLanguage();
   const { addToCart } = useCart();
   const router = useRouter();
@@ -19,6 +20,9 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [activeAudioIdx, setActiveAudioIdx] = useState(0);
+
+  const audioList = audioLessons || [];
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -110,7 +114,7 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
             </button>
           </div>
           <button className="btn btn-outline" style={{ width: '100%', fontWeight: 700, padding: '0.8rem' }}>
-            {lang === 'en' ? 'Look Inside' : 'একটু পড়ে দেখুন'}
+            {lang === 'en' ? 'Look Inside' : 'একটু পড়ে দেখুন'}
           </button>
         </div>
 
@@ -145,7 +149,7 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
                 <>
                   <span style={{ fontSize: '1.25rem', color: '#9ca3af', textDecoration: 'line-through' }}>TK. {book.originalPrice}</span>
                   <span style={{ color: 'var(--secondary)', fontWeight: 700, fontSize: '1rem' }}>
-                    {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% {lang === 'en' ? 'OFF' : 'ছাড়'}
+                    {Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% {lang === 'en' ? 'OFF' : 'ছাড়'}
                   </span>
                 </>
               )}
@@ -193,6 +197,48 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
             </a>
           )}
 
+          {/* Audio Lessons */}
+          {audioList.length > 0 && (
+            <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1e293b' }}>
+                <Headphones size={24} color="var(--primary)" /> {lang === 'en' ? 'Audio Lessons' : 'অডিও লেসন'}
+              </h3>
+              <AudioPlayer
+                src={audioList[activeAudioIdx]?.audioUrl}
+                title={lang === 'en' ? audioList[activeAudioIdx]?.titleEn : audioList[activeAudioIdx]?.titleBn}
+                subtitle={lang === 'en' ? `Lesson ${activeAudioIdx + 1} of ${audioList.length}` : `লেসন ${activeAudioIdx + 1} / ${audioList.length}`}
+                hasPrev={activeAudioIdx > 0}
+                hasNext={activeAudioIdx < audioList.length - 1}
+                onPrev={() => setActiveAudioIdx(i => Math.max(0, i - 1))}
+                onNext={() => setActiveAudioIdx(i => Math.min(audioList.length - 1, i + 1))}
+              />
+              {audioList.length > 1 && (
+                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {audioList.map((a: any, idx: number) => (
+                    <button
+                      key={a.id}
+                      onClick={() => setActiveAudioIdx(idx)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                        padding: '0.6rem 1rem',
+                        background: activeAudioIdx === idx ? '#f1f5f9' : 'transparent',
+                        border: `1px solid ${activeAudioIdx === idx ? 'var(--primary)' : '#e2e8f0'}`,
+                        borderRadius: '8px', cursor: 'pointer', textAlign: 'left', transition: '0.15s',
+                        color: activeAudioIdx === idx ? 'var(--primary)' : '#334155'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, minWidth: '20px', opacity: 0.5 }}>{idx + 1}</span>
+                      <span style={{ flex: 1, fontSize: '0.88rem', fontWeight: activeAudioIdx === idx ? 700 : 400 }}>
+                        {lang === 'en' ? a.titleEn : a.titleBn}
+                      </span>
+                      {a.duration && <span style={{ fontSize: '0.75rem', opacity: 0.55 }}>{a.duration}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Video Lessons */}
           {videos && videos.length > 0 && (
             <div style={{ marginTop: '2rem', background: '#f0f9ff', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid #bae6fd' }}>
@@ -201,14 +247,7 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                 {videos.map(v => (
-                  <div key={v.id} style={{ background: 'white', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e0f2fe' }}>
-                    <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-                      <iframe src={`https://www.youtube.com/embed/${v.youtubeId}`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} frameBorder="0" allowFullScreen />
-                    </div>
-                    <div style={{ padding: '0.75rem' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0c4a6e' }}>{lang === 'en' ? v.titleEn : v.titleBn}</div>
-                    </div>
-                  </div>
+                  <LazyVideoCard key={v.id} video={v} lang={lang} />
                 ))}
               </div>
             </div>
@@ -336,6 +375,32 @@ export default function BookDetailsClient({ book, relatedBooks, videos }: { book
             <Share2 size={16} /> {lang === 'en' ? 'Share this book' : 'শেয়ার করুন'}
           </button>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function LazyVideoCard({ video, lang }: { video: any, lang: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const thumb = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`;
+  return (
+    <div style={{ background: 'white', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e0f2fe' }}>
+      {loaded ? (
+        <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+          <iframe src={`https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} frameBorder="0" allowFullScreen allow="autoplay" />
+        </div>
+      ) : (
+        <div onClick={() => setLoaded(true)} style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer' }}>
+          <img src={thumb} alt={video.titleEn} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PlayCircle size={32} color="#dc2626" fill="#dc2626" />
+            </div>
+          </div>
+        </div>
+      )}
+      <div style={{ padding: '0.75rem' }}>
+        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0c4a6e' }}>{lang === 'en' ? video.titleEn : video.titleBn}</div>
       </div>
     </div>
   );

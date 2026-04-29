@@ -63,6 +63,7 @@ model Book {
   publisher     Publisher? @relation(fields: [publisherId], references: [id])
 
   videos        Video[]
+  audioLessons  AudioLesson[]
   reviews       Review[]
   wishlistItems WishlistItem[]
 
@@ -170,4 +171,19 @@ model Banner {
   link      String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+model AudioLesson {
+  id          Int      @id @default(autoincrement())
+  titleEn     String
+  titleBn     String
+  audioUrl    String
+  duration    String?
+  description String?
+  sortOrder   Int      @default(0)
+
+  bookId      Int?
+  book        Book?    @relation(fields: [bookId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
