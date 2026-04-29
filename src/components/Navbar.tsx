@@ -7,10 +7,9 @@ import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
-export default function Navbar() {
+export default function Navbar({ initialMenus = [] }: { initialMenus?: any[] }) {
   const { lang, setLang, t } = useLanguage();
   const { cart } = useCart();
-  const [menus, setMenus] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,19 +35,7 @@ export default function Navbar() {
     }
   };
 
-  useEffect(() => {
-    fetch('/api/menus')
-      .then(res => res.json())
-      .then(data => { if (Array.isArray(data)) setMenus(data); })
-      .catch(() => {});
-  }, []);
-
-  const navLinks = menus.length > 0 ? menus : [
-    { id: 1, labelEn: 'Books', labelBn: 'বইসমূহ', url: '/books' },
-    { id: 2, labelEn: 'Authors', labelBn: 'লেখক', url: '/authors' },
-    { id: 3, labelEn: 'Videos', labelBn: 'ভিডিও', url: '/videos' },
-    { id: 4, labelEn: 'Audio', labelBn: 'অডিও', url: '/audio' },
-  ];
+  const navLinks = initialMenus;
 
   return (
     <header style={{ width: '100%' }}>
