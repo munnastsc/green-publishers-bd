@@ -34,7 +34,7 @@ export default function Footer() {
         </div>
 
         {/* Quick Links */}
-        <div>
+        <div className="footer-links-hide">
           <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
             {lang === 'en' ? 'Quick Links' : 'দ্রুত লিঙ্ক'}
           </h4>
@@ -58,7 +58,7 @@ export default function Footer() {
         </div>
 
         {/* Categories */}
-        <div>
+        <div className="footer-links-hide">
           <h4 style={{ color: 'white', marginBottom: '1rem', fontSize: '1rem', borderBottom: '1px solid #334155', paddingBottom: '0.5rem' }}>
             {lang === 'en' ? 'Categories' : 'বিভাগসমূহ'}
           </h4>

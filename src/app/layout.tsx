@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { CartProvider } from '@/context/CartContext';
+import BottomNav from '@/components/BottomNav';
 import prisma from '@/lib/prisma';
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
             </main>
             <Footer />
+            <BottomNav />
           </CartProvider>
         </LanguageProvider>
       </body>

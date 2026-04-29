@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, ShoppingCart, User, Search, Menu, Phone, Globe, Heart, ShieldCheck, X } from 'lucide-react';
+import { BookOpen, ShoppingCart, User, Search, Menu, Phone, Globe, Heart, ShieldCheck, X, Headphones, Video, Users, LayoutGrid } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
@@ -37,8 +37,17 @@ export default function Navbar({ initialMenus = [] }: { initialMenus?: any[] }) 
 
   const navLinks = initialMenus;
 
+  const DRAWER_ICONS: Record<string, React.ReactNode> = {
+    '/books': <BookOpen size={17} />,
+    '/videos': <Video size={17} />,
+    '/audio': <Headphones size={17} />,
+    '/authors': <Users size={17} />,
+    '/categories': <LayoutGrid size={17} />,
+    '/contact': <Phone size={17} />,
+  };
+
   return (
-    <header style={{ width: '100%' }}>
+    <header className="site-header">
       {/* Top Bar */}
       <div className="top-bar">
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -191,27 +200,51 @@ export default function Navbar({ initialMenus = [] }: { initialMenus?: any[] }) 
           height: '100vh', background: 'white', zIndex: 1000, boxShadow: '4px 0 20px rgba(0,0,0,0.15)',
           overflowY: 'auto', padding: '0'
         }}>
-          <div style={{ background: 'var(--primary)', padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'white', fontWeight: 800, fontSize: '1.1rem' }}>মেনু</span>
-            <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-              <X size={24} />
+          <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', padding: '1.1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '5px', borderRadius: '6px', display: 'flex' }}>
+                <BookOpen size={20} color="white" />
+              </div>
+              <div>
+                <div style={{ color: 'white', fontWeight: 800, fontSize: '0.95rem', lineHeight: 1 }}>GreenPublishers<span style={{ color: '#fcd34d' }}>BD</span></div>
+                <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.58rem', letterSpacing: '1px', marginTop: '2px' }}>ONLINE BOOKSTORE</div>
+              </div>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '6px', padding: '5px', display: 'flex' }}>
+              <X size={22} />
             </button>
           </div>
-          <nav style={{ padding: '1rem 0' }}>
-            <Link href="/categories" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.5rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', borderBottom: '1px solid #f1f5f9' }}>
-              <Menu size={18} /> {t('allCategories')}
+          {user && (
+            <div style={{ padding: '0.85rem 1.25rem', background: '#f8fafc', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '1rem', flexShrink: 0 }}>
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e293b' }}>{user.name}</div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{user.email}</div>
+              </div>
+            </div>
+          )}
+          <nav style={{ padding: '0.5rem 0' }}>
+            <Link href="/categories" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.8rem 1.25rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', borderBottom: '1px solid #f1f5f9' }}>
+              <LayoutGrid size={17} /> {t('allCategories')}
             </Link>
             {navLinks.map((m: any) => (
-              <Link key={m.id} href={m.url} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.85rem 1.5rem', color: '#334155', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #f1f5f9', fontSize: '0.95rem' }}>
+              <Link key={m.id} href={m.url} onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.8rem 1.25rem', color: '#334155', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #f1f5f9', fontSize: '0.93rem' }}>
+                <span style={{ color: 'var(--primary)', display: 'flex' }}>{DRAWER_ICONS[m.url] ?? <BookOpen size={17} />}</span>
                 {lang === 'en' ? m.labelEn : m.labelBn}
               </Link>
             ))}
-            <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.5rem', color: '#334155', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #f1f5f9' }}>
-              <Heart size={18} /> {lang === 'en' ? 'Wishlist' : 'উইশলিস্ট'}
+            <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.8rem 1.25rem', color: '#334155', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid #f1f5f9', fontSize: '0.93rem' }}>
+              <Heart size={17} color="#ef4444" /> {lang === 'en' ? 'Wishlist' : 'উইশলিস্ট'}
             </Link>
-            {!user && (
-              <Link href="/auth" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.5rem', color: 'white', fontWeight: 700, textDecoration: 'none', background: 'var(--primary)', margin: '1rem', borderRadius: '8px' }}>
+            {!user ? (
+              <Link href="/auth" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.25rem', color: 'white', fontWeight: 700, textDecoration: 'none', background: 'var(--primary)', margin: '1rem', borderRadius: '10px', justifyContent: 'center', fontSize: '0.95rem' }}>
                 <User size={18} /> {lang === 'en' ? 'Sign In / Register' : 'লগইন / রেজিস্টার'}
+              </Link>
+            ) : (
+              <Link href="/profile" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.85rem 1.25rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', background: '#eff6ff', margin: '1rem', borderRadius: '10px', justifyContent: 'center', fontSize: '0.95rem', border: '1px solid #bfdbfe' }}>
+                <User size={18} /> {lang === 'en' ? 'My Profile' : 'আমার প্রোফাইল'}
               </Link>
             )}
           </nav>
