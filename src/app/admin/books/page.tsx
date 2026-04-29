@@ -7,15 +7,15 @@ export default function AdminBooksPage() {
   const [authors, setAuthors] = useState([]);
   const [publishers, setPublishers] = useState([]);
 
-  const [formData, setFormData] = useState({ 
-    id: null, titleEn: '', titleBn: '', price: '', originalPrice: '', categoryId: '', authorId: '', publisherId: '', imageUrl: '', description: ''
+  const [formData, setFormData] = useState({
+    id: null, titleEn: '', titleBn: '', price: '', originalPrice: '',
+    categoryId: '', authorId: '', publisherId: '', imageUrl: '',
+    rokomariLink: '', description: ''
   });
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -26,7 +26,6 @@ export default function AdminBooksPage() {
         fetch('/api/authors'),
         fetch('/api/publishers')
       ]);
-      
       if (booksRes.ok) setBooks(await booksRes.json());
       if (catRes.ok) setCategories(await catRes.json());
       if (authRes.ok) setAuthors(await authRes.json());
@@ -49,6 +48,7 @@ export default function AdminBooksPage() {
       authorId: book.authorId?.toString() || '',
       publisherId: book.publisherId?.toString() || '',
       imageUrl: book.imageUrl || '',
+      rokomariLink: book.rokomariLink || '',
       description: book.description || ''
     });
     setIsEditing(true);
@@ -56,7 +56,7 @@ export default function AdminBooksPage() {
   };
 
   const resetForm = () => {
-    setFormData({ id: null, titleEn: '', titleBn: '', price: '', originalPrice: '', categoryId: '', authorId: '', publisherId: '', imageUrl: '', description: '' });
+    setFormData({ id: null, titleEn: '', titleBn: '', price: '', originalPrice: '', categoryId: '', authorId: '', publisherId: '', imageUrl: '', rokomariLink: '', description: '' });
     setIsEditing(false);
   };
 
@@ -70,24 +70,17 @@ export default function AdminBooksPage() {
       authorId: formData.authorId ? parseInt(formData.authorId) : null,
       publisherId: formData.publisherId ? parseInt(formData.publisherId) : null,
     };
-    
-    const url = '/api/books';
     const method = isEditing ? 'PUT' : 'POST';
-
-    const res = await fetch(url, {
-      method: method,
+    const res = await fetch('/api/books', {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    
-    if (res.ok) {
-      resetForm();
-      fetchData();
-    }
+    if (res.ok) { resetForm(); fetchData(); }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure?')) return;
+    if (!confirm('এই বইটি মুছে ফেলবেন?')) return;
     const res = await fetch('/api/books', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -99,9 +92,9 @@ export default function AdminBooksPage() {
   return (
     <div>
       <h2 style={{ fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--primary-dark)' }}>Manage Books</h2>
-      
+
       <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left', border: isEditing ? '2px solid var(--primary)' : '1px solid #e2e8f0' }}>
-        <h3 className="section-title" style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+        <h3 className="section-title" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
           {isEditing ? 'Edit Book' : 'Add New Book'}
         </h3>
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -110,7 +103,7 @@ export default function AdminBooksPage() {
             <input required type="text" className="form-control" value={formData.titleEn} onChange={e => setFormData({...formData, titleEn: e.target.value})} />
           </div>
           <div className="input-group">
-            <label className="input-label">Title (Bengali)</label>
+            <label className="input-label">Title (Bengali / বাংলা নাম)</label>
             <input required type="text" className="form-control" value={formData.titleBn} onChange={e => setFormData({...formData, titleBn: e.target.value})} />
           </div>
           <div className="input-group">
@@ -118,12 +111,27 @@ export default function AdminBooksPage() {
             <input required type="number" className="form-control" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
           </div>
           <div className="input-group">
-            <label className="input-label">Original Price / MRP (TK) - Optional</label>
+            <label className="input-label">Original Price / MRP (TK) — Optional</label>
             <input type="number" className="form-control" value={formData.originalPrice} onChange={e => setFormData({...formData, originalPrice: e.target.value})} />
           </div>
           <div className="input-group" style={{ gridColumn: '1 / -1' }}>
             <label className="input-label">Image URL</label>
-            <input type="text" className="form-control" value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
+            <input type="text" className="form-control" placeholder="https://..." value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
+          </div>
+          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="input-label">
+              রকমারি / অন্য সাইটের কেনার লিঙ্ক (Buy Link) — Optional
+              <span style={{ fontWeight: 400, color: '#94a3b8', fontSize: '0.8rem', marginLeft: '0.5rem' }}>
+                (বুক ডিটেইলস পেজে বাটন দেখাবে)
+              </span>
+            </label>
+            <input
+              type="url"
+              className="form-control"
+              placeholder="https://www.rokomari.com/book/..."
+              value={formData.rokomariLink}
+              onChange={e => setFormData({...formData, rokomariLink: e.target.value})}
+            />
           </div>
           <div className="input-group">
             <label className="input-label">Category</label>
@@ -164,43 +172,55 @@ export default function AdminBooksPage() {
         ) : books.length === 0 ? (
           <p>No books added yet.</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                <th style={{ padding: '0.75rem 0' }}>Book Info</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {books.map((book: any) => (
-                <tr key={book.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '0.75rem 0' }}>
-                    <div style={{ fontWeight: 600 }}>{book.titleEn}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{book.titleBn}</div>
-                  </td>
-                  <td>{book.category?.nameEn}</td>
-                  <td>
-                    <div style={{ color: 'var(--primary)', fontWeight: 'bold' }}>TK. {book.price}</div>
-                    {book.originalPrice && (
-                      <div style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'line-through' }}>TK. {book.originalPrice}</div>
-                    )}
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button onClick={() => handleEdit(book)} className="btn" style={{ color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(book.id)} className="btn" style={{ color: '#dc2626', border: '1px solid #fca5a5', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
+                  <th style={{ padding: '0.75rem 0' }}>Book Info</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Buy Link</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {books.map((book: any) => (
+                  <tr key={book.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '0.75rem 0' }}>
+                      <div style={{ fontWeight: 600 }}>{book.titleEn}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{book.titleBn}</div>
+                    </td>
+                    <td>{book.category?.nameEn}</td>
+                    <td>
+                      <div style={{ color: 'var(--primary)', fontWeight: 'bold' }}>TK. {book.price}</div>
+                      {book.originalPrice && (
+                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', textDecoration: 'line-through' }}>TK. {book.originalPrice}</div>
+                      )}
+                    </td>
+                    <td style={{ fontSize: '0.8rem' }}>
+                      {book.rokomariLink ? (
+                        <a href={book.rokomariLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>
+                          লিঙ্ক আছে ✓
+                        </a>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>নেই</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button onClick={() => handleEdit(book)} className="btn" style={{ color: 'var(--primary)', border: '1px solid var(--primary)', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleDelete(book.id)} className="btn" style={{ color: '#dc2626', border: '1px solid #fca5a5', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

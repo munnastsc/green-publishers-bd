@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { titleEn, titleBn, description, price, originalPrice, imageUrl, categoryId, authorId, publisherId } = body;
+    const { titleEn, titleBn, description, price, originalPrice, imageUrl, rokomariLink, categoryId, authorId, publisherId } = body;
 
     const book = await prisma.book.create({
       data: {
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         price: parseFloat(price),
         originalPrice: originalPrice ? parseFloat(originalPrice) : null,
         imageUrl,
+        rokomariLink: rokomariLink || null,
         categoryId: categoryId || null,
         authorId: authorId || null,
         publisherId: publisherId || null,
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, titleEn, titleBn, description, price, originalPrice, imageUrl, categoryId, authorId, publisherId } = body;
+    const { id, titleEn, titleBn, description, price, originalPrice, imageUrl, rokomariLink, categoryId, authorId, publisherId } = body;
 
     const book = await prisma.book.update({
       where: { id: parseInt(id) },
@@ -53,6 +54,7 @@ export async function PUT(request: Request) {
         price: parseFloat(price),
         originalPrice: originalPrice ? parseFloat(originalPrice) : null,
         imageUrl,
+        rokomariLink: rokomariLink || null,
         categoryId: categoryId || null,
         authorId: authorId || null,
         publisherId: publisherId || null,

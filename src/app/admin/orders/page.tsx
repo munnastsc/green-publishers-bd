@@ -42,6 +42,7 @@ export default function AdminOrdersPage() {
                 <th style={{ padding: '0.75rem' }}>Phone</th>
                 <th style={{ padding: '0.75rem' }}>Items Ordered</th>
                 <th style={{ padding: '0.75rem' }}>Total</th>
+                <th style={{ padding: '0.75rem' }}>Payment</th>
                 <th style={{ padding: '0.75rem' }}>Date</th>
                 <th style={{ padding: '0.75rem' }}>Status</th>
                 <th style={{ padding: '0.75rem' }}>Action</th>
@@ -64,6 +65,18 @@ export default function AdminOrdersPage() {
                        </div>
                     </td>
                     <td style={{ padding: '0.75rem', fontWeight: 700, color: 'var(--secondary)' }}>TK. {o.totalAmount}</td>
+                    <td style={{ padding: '0.75rem' }}>
+                      <span style={{
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        background: o.paymentMethod === 'COD' ? '#fef3c7' : '#dbeafe',
+                        color: o.paymentMethod === 'COD' ? '#b45309' : '#1d4ed8'
+                      }}>
+                        {o.paymentMethod === 'COD' ? 'ক্যাশ অন ডেলিভারি' : 'Online'}
+                      </span>
+                    </td>
                     <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{new Date(o.createdAt).toLocaleDateString('en-BD')}</td>
                     <td style={{ padding: '0.75rem' }}>
                       <span style={{ padding: '0.25rem 0.6rem', backgroundColor: s.bg, color: s.color, borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 700 }}>{o.status}</span>

@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, Book, Layers, Users, Building, 
-  Menu as MenuIcon, Video, ShoppingCart, LogOut, Home, Eye, Image as ImageIcon, Tag
+import {
+  LayoutDashboard, Book, Layers, Users, Building,
+  Menu as MenuIcon, Video, ShoppingCart, LogOut, Eye, Image as ImageIcon, Tag, Settings
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -44,12 +44,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Banners', icon: <ImageIcon size={18} />, href: '/admin/banners' },
     { label: 'Orders', icon: <ShoppingCart size={18} />, href: '/admin/orders' },
     { label: 'Coupons', icon: <Tag size={18} />, href: '/admin/coupons' },
+    { label: 'Site Settings', icon: <Settings size={18} />, href: '/admin/settings' },
   ];
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', display: 'flex' }}>
       {/* Sidebar */}
-      <aside style={{ width: '260px', backgroundColor: '#1e293b', color: '#f8fafc', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh' }}>
+      <aside className="admin-sidebar" style={{ width: '260px', backgroundColor: '#1e293b', color: '#f8fafc', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 100 }}>
         <div style={{ padding: '1.5rem', borderBottom: '1px solid #334155' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Book size={24} color="#10b981" />
@@ -106,7 +107,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main style={{ marginLeft: '260px', flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <main className="admin-main" style={{ marginLeft: '260px', flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <header style={{ height: '60px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 2rem', justifyContent: 'space-between' }}>
           <h2 style={{ fontSize: '1.1rem', color: '#1e293b', fontWeight: 600 }}>
             {menuItems.find(m => m.href === pathname)?.label || 'Admin Control Panel'}

@@ -123,7 +123,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="container" style={{ padding: '3rem 1rem', maxWidth: '1100px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3rem' }}>
+      <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3rem' }}>
         
         {/* Left Column */}
         <form onSubmit={handlePlaceOrder}>
@@ -187,7 +187,7 @@ export default function CheckoutPage() {
         </form>
 
         {/* Right Column */}
-        <aside style={{ position: 'sticky', top: '2rem' }}>
+        <aside className="checkout-sticky" style={{ position: 'sticky', top: '2rem' }}>
           <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'var(--shadow-sm)' }}>
              <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>{lang === 'en' ? 'Final Summary' : 'অর্ডার সামারি'}</h3>
              

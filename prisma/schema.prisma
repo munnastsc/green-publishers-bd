@@ -51,13 +51,14 @@ model Book {
   price         Float
   originalPrice Float?
   imageUrl      String?
-  
+  rokomariLink  String?
+
   categoryId    Int?
   category      Category? @relation(fields: [categoryId], references: [id])
-  
+
   authorId      Int?
   author        Author?   @relation(fields: [authorId], references: [id])
-  
+
   publisherId   Int?
   publisher     Publisher? @relation(fields: [publisherId], references: [id])
 
@@ -133,12 +134,20 @@ model Order {
   address       String
   totalAmount   Float
   status        String   @default("PENDING")
-  items         String   
-  
+  items         String
+  paymentMethod String   @default("COD")
+
   userId        Int?
   user          User?    @relation(fields: [userId], references: [id])
-  
+
   createdAt     DateTime @default(now())
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model HomeSection {

@@ -23,13 +23,14 @@ export async function POST(request: Request) {
     const { customerName, customerPhone, address, totalAmount, items, userId, paymentMethod } = body;
     
     const order = await prisma.order.create({
-      data: { 
-        customerName, 
-        customerPhone, 
-        address, 
-        totalAmount: parseFloat(totalAmount), 
+      data: {
+        customerName,
+        customerPhone,
+        address,
+        totalAmount: parseFloat(totalAmount),
         items,
-        userId: userId ? parseInt(userId) : null
+        paymentMethod: paymentMethod || 'COD',
+        userId: userId ? parseInt(userId) : null,
       }
     });
 

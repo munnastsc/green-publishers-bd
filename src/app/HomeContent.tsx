@@ -98,7 +98,7 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
              {lang === 'en' ? 'All Subjects' : 'সব বিষয়'} ›
            </Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+        <div className="subject-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
           {categories.slice(0, 6).map((cat, idx) => (
             <Link key={cat.id} href={`/books?category=${cat.id}`} className="subject-card" style={{ padding: '1rem' }}>
               <div className="subject-icon" style={{ width: '45px', height: '45px' }}>
@@ -124,7 +124,7 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
                   {lang === 'en' ? 'View All' : 'সবগুলো দেখুন'} <ChevronRight size={16} />
                 </Link>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '1rem' }}>
+              <div className="books-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '1rem' }}>
                 {section.books.map((book: any) => (
                   <div key={book.id} className="book-card" style={{ padding: '10px' }}>
                     <Link href={`/books/${book.id}`} style={{ textDecoration: 'none' }}>

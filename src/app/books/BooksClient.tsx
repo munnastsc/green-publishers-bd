@@ -157,8 +157,8 @@ export default function BooksClient({ books, categories, authors }: { books: any
         )}
       </div>
 
-      {/* Main Product Grid - Now Full Width */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
+      {/* Main Product Grid */}
+      <div className="books-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem' }}>
         {filtered.length === 0 ? (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '5rem' }}>
              <BookOpen size={64} style={{ opacity: 0.1, marginBottom: '1rem' }} />
