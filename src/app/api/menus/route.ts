@@ -20,6 +20,19 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const { id, labelEn, labelBn, url, order } = await request.json();
+    const result = await prisma.menuItem.update({
+      where: { id: parseInt(id) },
+      data: { labelEn, labelBn, url, order: order ? parseInt(order) : 0 }
+    });
+    return NextResponse.json(result);
+  } catch {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();
