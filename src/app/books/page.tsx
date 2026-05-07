@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import BooksClient from './BooksClient';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Books - Green Publishers BD',
@@ -7,20 +8,46 @@ export const metadata = {
 
 export const dynamic = 'force-dynamic';
 
-import { Suspense } from 'react';
-
 export default async function BooksPage() {
-  const books = await prisma.book.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { author: true, category: true, publisher: true }
-  });
+  const [books, categories, authors, publishers, settingsRaw] = await Promise.all([
+    prisma.book.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { author: true, category: true, publisher: true }
+    }),
+    prisma.category.findMany(),
+    prisma.author.findMany(),
+    prisma.publisher.findMany({ orderBy: { nameEn: 'asc' } }),
+    prisma.siteSetting.findMany({
+      where: {
+        key: {
+          in: [
+            'featuredPublisherId',
+            'featuredPublisherSectionEn',
+            'featuredPublisherSectionBn',
+            'otherPublishersSectionEn',
+            'otherPublishersSectionBn',
+          ]
+        }
+      }
+    })
+  ]);
 
-  const categories = await prisma.category.findMany();
-  const authors = await prisma.author.findMany();
+  const settings: Record<string, string> = {};
+  settingsRaw.forEach(s => { settings[s.key] = s.value; });
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <BooksClient books={books} categories={categories} authors={authors} />
+      <BooksClient
+        books={books}
+        categories={categories}
+        authors={authors}
+        publishers={publishers}
+        featuredPublisherId={settings.featuredPublisherId ? parseInt(settings.featuredPublisherId) : null}
+        featuredSectionEn={settings.featuredPublisherSectionEn || 'Green Publishers Books'}
+        featuredSectionBn={settings.featuredPublisherSectionBn || 'গ্রিন পাবলিশার্স বই'}
+        otherSectionEn={settings.otherPublishersSectionEn || 'Other Publishers Books'}
+        otherSectionBn={settings.otherPublishersSectionBn || 'অন্যান্য প্রকাশনীর বই'}
+      />
     </Suspense>
   );
 }

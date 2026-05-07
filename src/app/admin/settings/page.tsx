@@ -4,14 +4,20 @@ import { Save, CheckCircle } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [publishers, setPublishers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(data => { setSettings(data); setLoading(false); });
+    Promise.all([
+      fetch('/api/settings').then(r => r.json()),
+      fetch('/api/publishers').then(r => r.json()),
+    ]).then(([settingsData, publishersData]) => {
+      setSettings(settingsData);
+      setPublishers(publishersData);
+      setLoading(false);
+    });
   }, []);
 
   const set = (key: string, value: string) => setSettings(s => ({ ...s, [key]: value }));
@@ -89,6 +95,67 @@ export default function AdminSettingsPage() {
             <div className="input-group">
               <label className="input-label">YouTube URL</label>
               <input className="form-control" value={settings.youtubeUrl || ''} onChange={e => set('youtubeUrl', e.target.value)} placeholder="https://youtube.com/..." />
+            </div>
+          </div>
+        </div>
+
+        {/* Books Page Settings */}
+        <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left' }}>
+          <SectionTitle>বইয়ের পাতার সেটিংস (Books Page)</SectionTitle>
+          <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe', fontSize: '0.9rem', color: '#1e40af' }}>
+            এখানে যে প্রকাশনী নির্বাচন করবেন, সেই প্রকাশনীর বই বইয়ের পাতায় সবার আগে আলাদা সেকশনে দেখাবে।
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="input-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="input-label">প্রথমে দেখাবে যে প্রকাশনীর বই (Featured Publisher)</label>
+              <select
+                className="form-control"
+                value={settings.featuredPublisherId || ''}
+                onChange={e => set('featuredPublisherId', e.target.value)}
+              >
+                <option value="">— কোনো প্রকাশনী নির্বাচন নেই (সব বই একসাথে) —</option>
+                {publishers.map((p: any) => (
+                  <option key={p.id} value={p.id}>{p.nameEn} / {p.nameBn}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">প্রথম সেকশনের শিরোনাম (English)</label>
+              <input
+                className="form-control"
+                value={settings.featuredPublisherSectionEn || ''}
+                onChange={e => set('featuredPublisherSectionEn', e.target.value)}
+                placeholder="Green Publishers Books"
+              />
+            </div>
+            <div className="input-group">
+              <label className="input-label">প্রথম সেকশনের শিরোনাম (বাংলা)</label>
+              <input
+                className="form-control"
+                value={settings.featuredPublisherSectionBn || ''}
+                onChange={e => set('featuredPublisherSectionBn', e.target.value)}
+                placeholder="গ্রিন পাবলিশার্স বই"
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="input-label">দ্বিতীয় সেকশনের শিরোনাম (English)</label>
+              <input
+                className="form-control"
+                value={settings.otherPublishersSectionEn || ''}
+                onChange={e => set('otherPublishersSectionEn', e.target.value)}
+                placeholder="Other Publishers Books"
+              />
+            </div>
+            <div className="input-group">
+              <label className="input-label">দ্বিতীয় সেকশনের শিরোনাম (বাংলা)</label>
+              <input
+                className="form-control"
+                value={settings.otherPublishersSectionBn || ''}
+                onChange={e => set('otherPublishersSectionBn', e.target.value)}
+                placeholder="অন্যান্য প্রকাশনীর বই"
+              />
             </div>
           </div>
         </div>

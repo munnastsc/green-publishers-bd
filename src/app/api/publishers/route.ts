@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const data = await prisma.publisher.findMany({ orderBy: { createdAt: 'desc' } });
+    const data = await prisma.publisher.findMany({ orderBy: { nameEn: 'asc' } });
     return NextResponse.json(data);
   } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
