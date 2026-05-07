@@ -187,3 +187,27 @@ model AudioLesson {
 
   createdAt   DateTime @default(now())
 }
+
+model EducationalMaterial {
+  id            Int      @id @default(autoincrement())
+  titleEn       String
+  titleBn       String
+  descriptionEn String?
+  descriptionBn String?
+  imageUrl      String?
+  fileUrl       String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+}
+
+model TrainingManual {
+  id            Int      @id @default(autoincrement())
+  titleEn       String
+  titleBn       String
+  descriptionEn String?
+  descriptionBn String?
+  imageUrl      String?
+  fileUrl       String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+}

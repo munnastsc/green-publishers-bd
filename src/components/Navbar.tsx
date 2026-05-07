@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, ShoppingCart, User, Search, Menu, Phone, Globe, Heart, ShieldCheck, X, Headphones, Video, Users, LayoutGrid } from 'lucide-react';
+import { BookOpen, ShoppingCart, User, Search, Menu, Phone, Globe, Heart, ShieldCheck, X, Headphones, Video, Users, LayoutGrid, BookMarked, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
 import { useState, useEffect } from 'react';
@@ -44,6 +44,8 @@ export default function Navbar({ initialMenus = [] }: { initialMenus?: any[] }) 
     '/authors': <Users size={17} />,
     '/categories': <LayoutGrid size={17} />,
     '/contact': <Phone size={17} />,
+    '/shiksha-upokoron': <BookMarked size={17} />,
+    '/prosikkhon-manual': <FileText size={17} />,
   };
 
   return (
