@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Book, Layers, Users, Building,
-  Menu as MenuIcon, Video, ShoppingCart, LogOut, Eye, Image as ImageIcon, Tag, Settings, Headphones, BookMarked, FileText
+  Menu as MenuIcon, Video, ShoppingCart, LogOut, Eye, Image as ImageIcon, Tag, Settings, Headphones, BookMarked, FileText, PanelLeft
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -44,6 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Audio Lessons', icon: <Headphones size={18} />, href: '/admin/audio' },
     { label: 'শিক্ষা উপকরণ', icon: <BookMarked size={18} />, href: '/admin/educational-materials' },
     { label: 'প্রশিক্ষণ ম্যানুয়াল', icon: <FileText size={18} />, href: '/admin/training-manuals' },
+    { label: 'Custom Pages', icon: <PanelLeft size={18} />, href: '/admin/custom-pages' },
     { label: 'Banners', icon: <ImageIcon size={18} />, href: '/admin/banners' },
     { label: 'Orders', icon: <ShoppingCart size={18} />, href: '/admin/orders' },
     { label: 'Coupons', icon: <Tag size={18} />, href: '/admin/coupons' },

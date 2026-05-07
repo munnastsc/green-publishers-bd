@@ -30,6 +30,25 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const { id, titleEn, titleBn, type, targetId, order } = await request.json();
+    const section = await prisma.homeSection.update({
+      where: { id: parseInt(id) },
+      data: {
+        titleEn,
+        titleBn,
+        type,
+        targetId: targetId ? parseInt(targetId) : null,
+        order: parseInt(order || '0')
+      }
+    });
+    return NextResponse.json(section);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();

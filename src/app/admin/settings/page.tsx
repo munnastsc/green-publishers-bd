@@ -99,6 +99,82 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Homepage Hero Settings */}
+        <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left' }}>
+          <SectionTitle>হোমপেজ হিরো সেকশন (Banner না থাকলে দেখাবে)</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="input-group">
+              <label className="input-label">শিরোনাম (English)</label>
+              <input className="form-control" value={settings.heroTitleEn || ''} onChange={e => set('heroTitleEn', e.target.value)} placeholder="Welcome to Green Publishers BD" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">শিরোনাম (বাংলা)</label>
+              <input className="form-control" value={settings.heroTitleBn || ''} onChange={e => set('heroTitleBn', e.target.value)} placeholder="গ্রিন পাবলিশার্স বিডিতে আপনাকে স্বাগতম" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">সাব-টাইটেল (English)</label>
+              <input className="form-control" value={settings.heroSubtitleEn || ''} onChange={e => set('heroSubtitleEn', e.target.value)} placeholder="Find your next favorite book here." />
+            </div>
+            <div className="input-group">
+              <label className="input-label">সাব-টাইটেল (বাংলা)</label>
+              <input className="form-control" value={settings.heroSubtitleBn || ''} onChange={e => set('heroSubtitleBn', e.target.value)} placeholder="আপনার পরবর্তী পছন্দের বইটি এখানে খুঁজে নিন।" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">বাটন লেখা (English)</label>
+              <input className="form-control" value={settings.heroBtnEn || ''} onChange={e => set('heroBtnEn', e.target.value)} placeholder="Explore More" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">বাটন লেখা (বাংলা)</label>
+              <input className="form-control" value={settings.heroBtnBn || ''} onChange={e => set('heroBtnBn', e.target.value)} placeholder="আরও দেখুন" />
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Strip Settings */}
+        <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left' }}>
+          <SectionTitle>হোমপেজ ফিচার স্ট্রিপ (নিচের ২টি আইকন বক্স)</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#64748b' }}>বক্স ১</div>
+              <div className="input-group">
+                <label className="input-label">শিরোনাম (English)</label>
+                <input className="form-control" value={settings.feature1TitleEn || ''} onChange={e => set('feature1TitleEn', e.target.value)} placeholder="Original Books" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">শিরোনাম (বাংলা)</label>
+                <input className="form-control" value={settings.feature1TitleBn || ''} onChange={e => set('feature1TitleBn', e.target.value)} placeholder="১০০% অরিজিনাল বই" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">বিবরণ (English)</label>
+                <input className="form-control" value={settings.feature1DescEn || ''} onChange={e => set('feature1DescEn', e.target.value)} placeholder="Directly from publishers" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">বিবরণ (বাংলা)</label>
+                <input className="form-control" value={settings.feature1DescBn || ''} onChange={e => set('feature1DescBn', e.target.value)} placeholder="সরাসরি প্রকাশনী থেকে" />
+              </div>
+            </div>
+            <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#64748b' }}>বক্স ২</div>
+              <div className="input-group">
+                <label className="input-label">শিরোনাম (English)</label>
+                <input className="form-control" value={settings.feature2TitleEn || ''} onChange={e => set('feature2TitleEn', e.target.value)} placeholder="Fast Delivery" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">শিরোনাম (বাংলা)</label>
+                <input className="form-control" value={settings.feature2TitleBn || ''} onChange={e => set('feature2TitleBn', e.target.value)} placeholder="দ্রুত ডেলিভারি" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">বিবরণ (English)</label>
+                <input className="form-control" value={settings.feature2DescEn || ''} onChange={e => set('feature2DescEn', e.target.value)} placeholder="Nationwide Shipping" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">বিবরণ (বাংলা)</label>
+                <input className="form-control" value={settings.feature2DescBn || ''} onChange={e => set('feature2DescBn', e.target.value)} placeholder="সারাদেশে ডেলিভারি" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Books Page Settings */}
         <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left' }}>
           <SectionTitle>বইয়ের পাতার সেটিংস (Books Page)</SectionTitle>

@@ -5,7 +5,7 @@ import { BookOpen, Star, ChevronRight, ShoppingCart, ArrowRight, Library, Gradua
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
 
-export default function HomeContent({ sectionData, categories, banners }: { sectionData: any[], categories: any[], banners?: any[] }) {
+export default function HomeContent({ sectionData, categories, banners, settings = {} }: { sectionData: any[], categories: any[], banners?: any[], settings?: Record<string, string> }) {
   const { lang, t } = useLanguage();
   const { addToCart } = useCart();
 
@@ -59,16 +59,16 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
           ))
         ) : (
           /* Default Banner if none exists */
-          <div style={{ 
-            width: '100%', 
-            height: '300px', 
-            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', 
-            borderRadius: 'var(--radius-sm)', 
-            position: 'relative', 
-            overflow: 'hidden', 
-            display: 'flex', 
-            alignItems: 'center', 
-            padding: '2.5rem 4rem', 
+          <div style={{
+            width: '100%',
+            height: '300px',
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+            borderRadius: 'var(--radius-sm)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '2.5rem 4rem',
             color: 'white',
             boxShadow: 'var(--shadow-sm)'
           }}>
@@ -77,11 +77,18 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
                 {lang === 'en' ? 'WELCOME' : 'স্বাগতম'}
               </span>
               <h1 style={{ fontSize: '2.5rem', marginBottom: '0.8rem', color: 'white', lineHeight: 1.1, fontWeight: 900 }}>
-                {lang === 'en' ? 'Welcome to Green Publishers BD' : 'গ্রিন পাবলিশার্স বিডিতে আপনাকে স্বাগতম'}
+                {lang === 'en'
+                  ? (settings.heroTitleEn || 'Welcome to Green Publishers BD')
+                  : (settings.heroTitleBn || 'গ্রিন পাবলিশার্স বিডিতে আপনাকে স্বাগতম')}
               </h1>
               <p style={{ fontSize: '1rem', marginBottom: '2rem', opacity: 0.9, fontWeight: 400 }}>
-                {lang === 'en' ? 'Find your next favorite book here.' : 'আপনার পরবর্তী পছন্দের বইটি এখানে খুঁজে নিন।'}
+                {lang === 'en'
+                  ? (settings.heroSubtitleEn || 'Find your next favorite book here.')
+                  : (settings.heroSubtitleBn || 'আপনার পরবর্তী পছন্দের বইটি এখানে খুঁজে নিন।')}
               </p>
+              <Link href="/books" className="btn btn-orange" style={{ padding: '0.7rem 2rem', fontSize: '0.95rem', borderRadius: '30px', textDecoration: 'none', display: 'inline-block' }}>
+                {lang === 'en' ? (settings.heroBtnEn || 'Explore More') : (settings.heroBtnBn || 'আরও দেখুন')}
+              </Link>
             </div>
             <div style={{ position: 'absolute', right: '5%', bottom: '-20px', width: '280px', height: '350px', opacity: 0.15 }}>
                <BookOpen size={260} color="white" />
@@ -192,13 +199,21 @@ export default function HomeContent({ sectionData, categories, banners }: { sect
          <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'center' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
                <div style={{ color: 'var(--primary)', marginBottom: '0.25rem' }}><Library size={30} /></div>
-               <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{lang === 'en' ? 'Original Books' : '১০০% অরিজিনাল বই'}</h4>
-               <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{lang === 'en' ? 'Directly from publishers' : 'সরাসরি প্রকাশনী থেকে'}</p>
+               <h4 style={{ margin: 0, fontSize: '0.95rem' }}>
+                 {lang === 'en' ? (settings.feature1TitleEn || 'Original Books') : (settings.feature1TitleBn || '১০০% অরিজিনাল বই')}
+               </h4>
+               <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                 {lang === 'en' ? (settings.feature1DescEn || 'Directly from publishers') : (settings.feature1DescBn || 'সরাসরি প্রকাশনী থেকে')}
+               </p>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
                <div style={{ color: 'var(--primary)', marginBottom: '0.25rem' }}><ArrowRight size={30} /></div>
-               <h4 style={{ margin: 0, fontSize: '0.95rem' }}>{lang === 'en' ? 'Fast Delivery' : 'দ্রুত ডেলিভারি'}</h4>
-               <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{lang === 'en' ? 'Nationwide Shipping' : 'সারাদেশে ডেলিভারি'}</p>
+               <h4 style={{ margin: 0, fontSize: '0.95rem' }}>
+                 {lang === 'en' ? (settings.feature2TitleEn || 'Fast Delivery') : (settings.feature2TitleBn || 'দ্রুত ডেলিভারি')}
+               </h4>
+               <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                 {lang === 'en' ? (settings.feature2DescEn || 'Nationwide Shipping') : (settings.feature2DescBn || 'সারাদেশে ডেলিভারি')}
+               </p>
             </div>
          </div>
       </div>
