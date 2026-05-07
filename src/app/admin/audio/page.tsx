@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Headphones, Trash2, Music, ExternalLink, Pencil, X, Check } from 'lucide-react';
+import FileUpload from '@/components/admin/FileUpload';
 
 const BLANK = { titleEn: '', titleBn: '', audioUrl: '', duration: '', description: '', bookId: '', sortOrder: '0' };
 
@@ -82,10 +83,8 @@ export default function AdminAudioPage() {
             <input required type="text" className="form-control" value={formData.titleBn} onChange={e => setFormData({ ...formData, titleBn: e.target.value })} placeholder="অধ্যায় ১: ভূমিকা" />
           </div>
 
-          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="input-label">Audio File URL *</label>
-            <input required type="url" className="form-control" value={formData.audioUrl} onChange={e => setFormData({ ...formData, audioUrl: e.target.value })} placeholder="https://example.com/audio/lesson1.mp3" />
-            <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px' }}>Direct MP3/OGG link. Use any hosted audio file URL.</p>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <FileUpload label="Audio File *" folder="audio" value={formData.audioUrl} onChange={url => setFormData({ ...formData, audioUrl: url })} required />
           </div>
 
           <div className="input-group">

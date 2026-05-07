@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { FileText, Trash2, Pencil, X, Check, Plus } from 'lucide-react';
+import FileUpload from '@/components/admin/FileUpload';
 
 const BLANK = { titleEn: '', titleBn: '', descriptionEn: '', descriptionBn: '', imageUrl: '', fileUrl: '', sortOrder: '0' };
 
@@ -99,13 +100,11 @@ export default function AdminTrainingManualsPage() {
             <textarea className="form-control" rows={2} placeholder="সংক্ষিপ্ত বিবরণ..." value={formData.descriptionBn} onChange={e => setFormData({ ...formData, descriptionBn: e.target.value })} style={{ resize: 'vertical' }} />
           </div>
 
-          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="input-label">কভার ইমেজ URL</label>
-            <input type="url" className="form-control" placeholder="https://example.com/image.jpg" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} />
+          <div style={{ gridColumn: '1 / -1' }}>
+            <FileUpload label="কভার ইমেজ" folder="images" value={formData.imageUrl} onChange={url => setFormData({ ...formData, imageUrl: url })} />
           </div>
-          <div className="input-group">
-            <label className="input-label">ফাইল / PDF লিংক</label>
-            <input type="url" className="form-control" placeholder="https://example.com/manual.pdf" value={formData.fileUrl} onChange={e => setFormData({ ...formData, fileUrl: e.target.value })} />
+          <div>
+            <FileUpload label="ফাইল / PDF আপলোড" folder="files" value={formData.fileUrl} onChange={url => setFormData({ ...formData, fileUrl: url })} />
           </div>
           <div className="input-group">
             <label className="input-label">ক্রম (Sort Order)</label>

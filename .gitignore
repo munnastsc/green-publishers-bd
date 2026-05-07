@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# uploaded files (stored on server, not in git)
+/public/uploads/images/*
+!/public/uploads/images/.gitkeep
+/public/uploads/files/*
+!/public/uploads/files/.gitkeep
+/public/uploads/audio/*
+!/public/uploads/audio/.gitkeep

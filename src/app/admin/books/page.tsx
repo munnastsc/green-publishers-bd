@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import FileUpload from '@/components/admin/FileUpload';
 
 export default function AdminBooksPage() {
   const [books, setBooks] = useState([]);
@@ -114,9 +115,8 @@ export default function AdminBooksPage() {
             <label className="input-label">Original Price / MRP (TK) — Optional</label>
             <input type="number" className="form-control" value={formData.originalPrice} onChange={e => setFormData({...formData, originalPrice: e.target.value})} />
           </div>
-          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="input-label">Image URL</label>
-            <input type="text" className="form-control" placeholder="https://..." value={formData.imageUrl} onChange={e => setFormData({...formData, imageUrl: e.target.value})} />
+          <div style={{ gridColumn: '1 / -1' }}>
+            <FileUpload label="বইয়ের ছবি" folder="images" value={formData.imageUrl} onChange={url => setFormData({...formData, imageUrl: url})} />
           </div>
           <div className="input-group" style={{ gridColumn: '1 / -1' }}>
             <label className="input-label">
