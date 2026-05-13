@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Headphones, Music, Search, Lock } from 'lucide-react';
+import { Headphones, Music, Search, Lock, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import AudioPlayer from '@/components/AudioPlayer';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import Link from 'next/link';
 export default function AudioClient({ lessons }: { lessons: any[] }) {
   const { lang } = useLanguage();
   const [search, setSearch] = useState('');
-  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [showLockPopup, setShowLockPopup] = useState(false);
@@ -28,12 +28,32 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
     return title.toLowerCase().includes(search.toLowerCase());
   });
 
-  const activeSrc = activeIdx !== null && filtered[activeIdx] ? filtered[activeIdx].audioUrl : null;
-  const activeLesson = activeIdx !== null ? filtered[activeIdx] : null;
+  // Group by book
+  const groups: { book: any | null; lessons: any[] }[] = [];
+  const seen = new Set<number | null>();
+  filtered.forEach(l => {
+    const bookId = l.book?.id ?? null;
+    if (!seen.has(bookId)) {
+      seen.add(bookId);
+      groups.push({ book: l.book ?? null, lessons: [] });
+    }
+    groups.find(g => (g.book?.id ?? null) === bookId)!.lessons.push(l);
+  });
+  groups.sort((a, b) => {
+    if (a.book && !b.book) return -1;
+    if (!a.book && b.book) return 1;
+    return 0;
+  });
 
-  const handleLessonClick = (idx: number) => {
+  const activeLesson = activeId !== null ? filtered.find(l => l.id === activeId) ?? null : null;
+  const activeSrc = activeLesson?.audioUrl ?? null;
+
+  const flatFiltered = filtered;
+  const activeIdx = activeLesson ? flatFiltered.findIndex(l => l.id === activeId) : -1;
+
+  const handleClick = (lesson: any) => {
     if (!hasAccess) { setShowLockPopup(true); return; }
-    setActiveIdx(idx);
+    setActiveId(lesson.id);
   };
 
   if (!accessChecked) return null;
@@ -42,14 +62,8 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
     <div className="container" style={{ padding: '2rem 1rem' }}>
       {/* Lock Popup */}
       {showLockPopup && (
-        <div
-          onClick={() => setShowLockPopup(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
-          >
+        <div onClick={() => setShowLockPopup(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
               <Lock size={28} color="#dc2626" />
             </div>
@@ -89,28 +103,22 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
           </p>
         </div>
         <div className="search-container" style={{ margin: 0, minWidth: '260px' }}>
-          <input
-            type="text"
-            placeholder={lang === 'en' ? 'Search lessons...' : 'লেসন খুঁজুন...'}
-            className="search-input"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          <input type="text" placeholder={lang === 'en' ? 'Search lessons...' : 'লেসন খুঁজুন...'} className="search-input" value={search} onChange={e => setSearch(e.target.value)} />
           <button className="search-btn"><Search size={18} /></button>
         </div>
       </div>
 
-      {/* Sticky Player — only for active users */}
+      {/* Sticky Player */}
       {hasAccess && activeSrc && activeLesson && (
         <div style={{ position: 'sticky', top: '10px', zIndex: 50, marginBottom: '2rem' }}>
           <AudioPlayer
             src={activeSrc}
             title={lang === 'en' ? activeLesson.titleEn : activeLesson.titleBn}
             subtitle={activeLesson.book ? (lang === 'en' ? activeLesson.book.titleEn : activeLesson.book.titleBn) : undefined}
-            hasPrev={activeIdx! > 0}
-            hasNext={activeIdx! < filtered.length - 1}
-            onPrev={() => setActiveIdx(i => Math.max(0, (i ?? 0) - 1))}
-            onNext={() => setActiveIdx(i => Math.min(filtered.length - 1, (i ?? 0) + 1))}
+            hasPrev={activeIdx > 0}
+            hasNext={activeIdx < flatFiltered.length - 1}
+            onPrev={() => { if (activeIdx > 0) setActiveId(flatFiltered[activeIdx - 1].id); }}
+            onNext={() => { if (activeIdx < flatFiltered.length - 1) setActiveId(flatFiltered[activeIdx + 1].id); }}
           />
         </div>
       )}
@@ -121,60 +129,76 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
           <h3>{lang === 'en' ? 'No audio lessons found.' : 'কোনো অডিও লেসন পাওয়া যায়নি।'}</h3>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {filtered.map((l: any, idx: number) => {
-            const isPlaying = hasAccess && activeIdx === idx;
-            return (
-              <div
-                key={l.id}
-                onClick={() => handleLessonClick(idx)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '1rem',
-                  padding: '1rem 1.25rem',
-                  background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
-                  color: isPlaying ? 'white' : 'inherit',
-                  border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
-                  opacity: !hasAccess ? 0.75 : 1,
-                }}
-              >
-                <div style={{
-                  width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
-                  background: isPlaying
-                    ? 'linear-gradient(135deg, #f59e0b, #ef4444)'
-                    : !hasAccess ? '#f1f5f9' : '#f1f5f9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
-                }}>
-                  {!hasAccess
-                    ? <Lock size={16} color="#94a3b8" />
-                    : <Music size={18} color={isPlaying ? 'white' : '#64748b'} />
-                  }
-                </div>
-
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {lang === 'en' ? l.titleEn : l.titleBn}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          {groups.map((group, gi) => (
+            <div key={gi}>
+              {/* Book section header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '2px solid #e2e8f0' }}>
+                {group.book?.imageUrl ? (
+                  <img src={group.book.imageUrl} alt="" style={{ width: '42px', height: '56px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
+                ) : (
+                  <div style={{ width: '42px', height: '56px', borderRadius: '6px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BookOpen size={20} color="white" />
                   </div>
-                  {l.book && (
-                    <div style={{ fontSize: '0.78rem', opacity: isPlaying ? 0.6 : 0.7, marginTop: '2px' }}>
-                      {lang === 'en' ? l.book.titleEn : l.book.titleBn}
-                    </div>
-                  )}
-                  {l.description && (
-                    <div style={{ fontSize: '0.78rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
-                  )}
-                </div>
-
-                {l.duration && (
-                  <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
                 )}
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e293b' }}>
+                    {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Lessons' : 'সাধারণ লেসন')}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                    {group.lessons.length} {lang === 'en' ? 'lessons' : 'টি লেসন'}
+                  </div>
+                </div>
               </div>
-            );
-          })}
+
+              {/* Lessons list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {group.lessons.map((l: any) => {
+                  const isPlaying = hasAccess && activeId === l.id;
+                  return (
+                    <div
+                      key={l.id}
+                      onClick={() => handleClick(l)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '1rem',
+                        padding: '0.9rem 1.25rem',
+                        background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
+                        color: isPlaying ? 'white' : 'inherit',
+                        border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                        opacity: !hasAccess ? 0.75 : 1,
+                      }}
+                    >
+                      <div style={{
+                        width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
+                        background: isPlaying ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
+                      }}>
+                        {!hasAccess ? <Lock size={15} color="#94a3b8" /> : <Music size={17} color={isPlaying ? 'white' : '#64748b'} />}
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {lang === 'en' ? l.titleEn : l.titleBn}
+                        </div>
+                        {l.description && (
+                          <div style={{ fontSize: '0.76rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
+                        )}
+                      </div>
+
+                      {l.duration && (
+                        <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Search, PlayCircle, Lock } from 'lucide-react';
+import { Search, PlayCircle, Lock, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 
@@ -17,11 +17,8 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
   return (
     <div
       style={{
-        background: 'white',
-        border: '1px solid #e2e8f0',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        transition: 'box-shadow 0.2s, transform 0.2s',
+        background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px',
+        overflow: 'hidden', transition: 'box-shadow 0.2s, transform 0.2s',
         boxShadow: '0 1px 4px rgba(0,0,0,0.05)'
       }}
       onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; }}
@@ -32,49 +29,34 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
           <iframe
             src={`https://www.youtube.com/embed/${v.youtubeId}?autoplay=1`}
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-            frameBorder="0"
-            allowFullScreen
-            allow="autoplay"
-            title={v.titleEn}
+            frameBorder="0" allowFullScreen allow="autoplay" title={v.titleEn}
           />
         </div>
       ) : (
-        <div
-          onClick={handleClick}
-          style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer', overflow: 'hidden' }}
-        >
+        <div onClick={handleClick} style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer', overflow: 'hidden' }}>
           <img
-            src={thumb}
-            alt={v.titleEn}
+            src={thumb} alt={v.titleEn}
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s', filter: hasAccess ? 'none' : 'brightness(0.55)' }}
           />
-
-          {/* Play or Lock icon */}
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.15)' }}>
             {hasAccess ? (
               <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(220,38,38,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(220,38,38,0.4)' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '3px' }}>
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '3px' }}><path d="M8 5v14l11-7z"/></svg>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.4)' }}>
                   <Lock size={22} color="white" />
                 </div>
-                <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.03em' }}>
+                <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '2px 10px', borderRadius: '20px' }}>
                   {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
                 </span>
               </div>
             )}
           </div>
-
-          <div style={{ position: 'absolute', bottom: '8px', right: '10px', background: 'rgba(0,0,0,0.75)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px' }}>
-            YouTube
-          </div>
+          <div style={{ position: 'absolute', bottom: '8px', right: '10px', background: 'rgba(0,0,0,0.75)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px' }}>YouTube</div>
         </div>
       )}
-
       <div style={{ padding: '1rem' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.3rem', color: '#1e293b', lineHeight: 1.4 }}>
           {lang === 'en' ? v.titleEn : v.titleBn}
@@ -84,23 +66,11 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
             {v.description}
           </p>
         )}
-        {v.book && (
-          <div style={{ marginTop: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#f0f9ff', color: 'var(--primary)', fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', fontWeight: 600 }}>
-            {lang === 'en' ? v.book?.titleEn : v.book?.titleBn}
-          </div>
-        )}
       </div>
 
-      {/* Lock popup */}
       {showLock && (
-        <div
-          onClick={() => setShowLock(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
-          >
+        <div onClick={() => setShowLock(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
             <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
               <Lock size={28} color="#dc2626" />
             </div>
@@ -108,9 +78,7 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
               {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
             </h3>
             <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              {lang === 'en'
-                ? 'This video is for active members only. Log in or contact admin to activate your account.'
-                : 'এই ভিডিওটি শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
+              {lang === 'en' ? 'This video is for active members only. Log in or contact admin to activate your account.' : 'এই ভিডিওটি শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <Link href="/auth" className="btn btn-blue" style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem' }}>
@@ -147,6 +115,26 @@ export default function VideosClient({ videos }: { videos: any[] }) {
     return title.toLowerCase().includes(search.toLowerCase());
   });
 
+  // Group by book
+  const groups: { book: any | null; videos: any[] }[] = [];
+  const seen = new Set<number | null>();
+
+  filtered.forEach(v => {
+    const bookId = v.book?.id ?? null;
+    if (!seen.has(bookId)) {
+      seen.add(bookId);
+      groups.push({ book: v.book ?? null, videos: [] });
+    }
+    groups.find(g => (g.book?.id ?? null) === bookId)!.videos.push(v);
+  });
+
+  // Sort: books first, no-book last
+  groups.sort((a, b) => {
+    if (a.book && !b.book) return -1;
+    if (!a.book && b.book) return 1;
+    return 0;
+  });
+
   if (!accessChecked) return null;
 
   return (
@@ -177,8 +165,33 @@ export default function VideosClient({ videos }: { videos: any[] }) {
           <h3>{lang === 'en' ? 'No videos found.' : 'কোনো ভিডিও পাওয়া যায়নি।'}</h3>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-          {filtered.map((v: any) => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          {groups.map((group, gi) => (
+            <div key={gi}>
+              {/* Book section header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid #e2e8f0' }}>
+                {group.book?.imageUrl ? (
+                  <img src={group.book.imageUrl} alt="" style={{ width: '42px', height: '56px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
+                ) : (
+                  <div style={{ width: '42px', height: '56px', borderRadius: '6px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <BookOpen size={20} color="white" />
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e293b' }}>
+                    {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Videos' : 'সাধারণ ভিডিও')}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                    {group.videos.length} {lang === 'en' ? 'videos' : 'টি ভিডিও'}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                {group.videos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
