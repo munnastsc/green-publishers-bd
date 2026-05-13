@@ -4,9 +4,15 @@ import { Search, PlayCircle, Lock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 
-function VideoCard({ v, lang }: { v: any, lang: string }) {
+function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: boolean }) {
+  const [showLock, setShowLock] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const thumb = `https://img.youtube.com/vi/${v.youtubeId}/hqdefault.jpg`;
+
+  const handleClick = () => {
+    if (!hasAccess) { setShowLock(true); return; }
+    setLoaded(true);
+  };
 
   return (
     <div
@@ -34,34 +40,41 @@ function VideoCard({ v, lang }: { v: any, lang: string }) {
         </div>
       ) : (
         <div
-          onClick={() => setLoaded(true)}
+          onClick={handleClick}
           style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer', overflow: 'hidden' }}
         >
           <img
             src={thumb}
             alt={v.titleEn}
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
-            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.04)')}
-            onMouseLeave={e => (e.currentTarget.style.transform = 'none')}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s', filter: hasAccess ? 'none' : 'brightness(0.55)' }}
           />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
-            <div style={{
-              width: '60px', height: '60px', borderRadius: '50%',
-              background: 'rgba(220,38,38,0.95)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
-              transition: 'transform 0.2s'
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '3px' }}>
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
+
+          {/* Play or Lock icon */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.15)' }}>
+            {hasAccess ? (
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(220,38,38,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(220,38,38,0.4)' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style={{ marginLeft: '3px' }}>
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.4)' }}>
+                  <Lock size={22} color="white" />
+                </div>
+                <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, background: 'rgba(0,0,0,0.6)', padding: '2px 10px', borderRadius: '20px', letterSpacing: '0.03em' }}>
+                  {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
+                </span>
+              </div>
+            )}
           </div>
+
           <div style={{ position: 'absolute', bottom: '8px', right: '10px', background: 'rgba(0,0,0,0.75)', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '3px' }}>
             YouTube
           </div>
         </div>
       )}
+
       <div style={{ padding: '1rem' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.3rem', color: '#1e293b', lineHeight: 1.4 }}>
           {lang === 'en' ? v.titleEn : v.titleBn}
@@ -77,6 +90,39 @@ function VideoCard({ v, lang }: { v: any, lang: string }) {
           </div>
         )}
       </div>
+
+      {/* Lock popup */}
+      {showLock && (
+        <div
+          onClick={() => setShowLock(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+          >
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <Lock size={28} color="#dc2626" />
+            </div>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem', color: '#1e293b' }}>
+              {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
+            </h3>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              {lang === 'en'
+                ? 'This video is for active members only. Log in or contact admin to activate your account.'
+                : 'এই ভিডিওটি শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+              <Link href="/auth" className="btn btn-blue" style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem' }}>
+                {lang === 'en' ? 'Login' : 'লগইন'}
+              </Link>
+              <button onClick={() => setShowLock(false)} style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                {lang === 'en' ? 'Close' : 'বন্ধ করুন'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -84,8 +130,8 @@ function VideoCard({ v, lang }: { v: any, lang: string }) {
 export default function VideosClient({ videos }: { videos: any[] }) {
   const { lang } = useLanguage();
   const [search, setSearch] = useState('');
-  const [accessChecked, setAccessChecked] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -103,27 +149,6 @@ export default function VideosClient({ videos }: { videos: any[] }) {
 
   if (!accessChecked) return null;
 
-  if (!hasAccess) {
-    return (
-      <div className="container" style={{ padding: '6rem 1rem', textAlign: 'center', maxWidth: '500px' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <Lock size={36} color="#dc2626" />
-        </div>
-        <h2 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '0.75rem' }}>
-          {lang === 'en' ? 'Access Restricted' : 'প্রবেশাধিকার নেই'}
-        </h2>
-        <p style={{ color: '#64748b', lineHeight: 1.7, marginBottom: '2rem' }}>
-          {lang === 'en'
-            ? 'Video lessons are available to active members only. Please log in with an activated account or contact admin to activate your account.'
-            : 'ভিডিও ক্লাস শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে আপনার অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
-        </p>
-        <Link href="/auth" className="btn btn-blue" style={{ padding: '0.8rem 2.5rem', borderRadius: '30px' }}>
-          {lang === 'en' ? 'Login' : 'লগইন করুন'}
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="container" style={{ padding: '2rem 1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
@@ -132,7 +157,12 @@ export default function VideosClient({ videos }: { videos: any[] }) {
             {lang === 'en' ? 'Video Lessons' : 'ভিডিও ক্লাস'}
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            {lang === 'en' ? `${filtered.length} videos — click to play` : `${filtered.length}টি ভিডিও — ক্লিক করে দেখুন`}
+            {lang === 'en' ? `${filtered.length} videos` : `${filtered.length}টি ভিডিও`}
+            {!hasAccess && (
+              <span style={{ marginLeft: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#fef2f2', color: '#dc2626', padding: '2px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
+                <Lock size={12} /> {lang === 'en' ? 'Login to watch' : 'দেখতে লগইন করুন'}
+              </span>
+            )}
           </p>
         </div>
         <div className="search-container" style={{ margin: 0, minWidth: '260px' }}>
@@ -148,7 +178,7 @@ export default function VideosClient({ videos }: { videos: any[] }) {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
-          {filtered.map((v: any) => <VideoCard key={v.id} v={v} lang={lang} />)}
+          {filtered.map((v: any) => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
         </div>
       )}
     </div>
