@@ -81,8 +81,12 @@ export default function AdminSettingsPage() {
               <input className="form-control" value={settings.phone || ''} onChange={e => set('phone', e.target.value)} placeholder="16297" />
             </div>
             <div className="input-group">
-              <label className="input-label">Email</label>
+              <label className="input-label">Public Email (সাইটে দেখাবে)</label>
               <input className="form-control" type="email" value={settings.email || ''} onChange={e => set('email', e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label className="input-label">Admin Email (অর্ডার নোটিফিকেশন পাবেন)</label>
+              <input className="form-control" type="email" value={settings.adminEmail || ''} onChange={e => set('adminEmail', e.target.value)} placeholder="admin@example.com" />
             </div>
             <div className="input-group" style={{ gridColumn: '1 / -1' }}>
               <label className="input-label">Address (ঠিকানা)</label>
@@ -267,6 +271,32 @@ export default function AdminSettingsPage() {
             <div className="input-group">
               <label className="input-label">ঢাকার বাইরে (Outside Dhaka) — TK</label>
               <input className="form-control" type="number" value={settings.deliveryChargeOutside || '150'} onChange={e => set('deliveryChargeOutside', e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        {/* Email (SMTP) Settings */}
+        <div className="book-card" style={{ padding: '2rem', marginBottom: '2rem', textAlign: 'left' }}>
+          <SectionTitle>ইমেইল সেটিংস — SMTP (অর্ডার ইমেইল পাঠানোর জন্য)</SectionTitle>
+          <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fffbeb', borderRadius: '8px', border: '1px solid #fde68a', fontSize: '0.9rem', color: '#92400e' }}>
+            Gmail ব্যবহার করলে: SMTP Host = smtp.gmail.com, Port = 587। Gmail App Password ব্যবহার করুন (2-step verification চালু করে Settings → Security → App Passwords থেকে নিন)।
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="input-group">
+              <label className="input-label">SMTP Host</label>
+              <input className="form-control" value={settings.smtpHost || ''} onChange={e => set('smtpHost', e.target.value)} placeholder="smtp.gmail.com" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">SMTP Port</label>
+              <input className="form-control" type="number" value={settings.smtpPort || '587'} onChange={e => set('smtpPort', e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label className="input-label">SMTP User (Email)</label>
+              <input className="form-control" type="email" value={settings.smtpUser || ''} onChange={e => set('smtpUser', e.target.value)} placeholder="yourmail@gmail.com" />
+            </div>
+            <div className="input-group">
+              <label className="input-label">SMTP Password (App Password)</label>
+              <input className="form-control" type="password" value={settings.smtpPass || ''} onChange={e => set('smtpPass', e.target.value)} placeholder="••••••••••••" />
             </div>
           </div>
         </div>

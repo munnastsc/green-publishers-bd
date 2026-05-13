@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   siteTagline: 'Your Trusted Online Bookstore',
   phone: '16297',
   email: 'info@greenpublishersbd.com',
+  adminEmail: 'info@greenpublishersbd.com',
   address: 'Dhaka, Bangladesh',
   rokomariButtonLabel: 'রকমারিতে কিনুন',
   facebookUrl: '#',

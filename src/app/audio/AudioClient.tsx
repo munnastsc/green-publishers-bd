@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Headphones, Music, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Headphones, Music, Search, Lock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import AudioPlayer from '@/components/AudioPlayer';
 import Link from 'next/link';
@@ -10,6 +10,17 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
   const { lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [accessChecked, setAccessChecked] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const user = JSON.parse(stored);
+      setHasAccess(user.isActive === true);
+    }
+    setAccessChecked(true);
+  }, []);
 
   const filtered = lessons.filter((l: any) => {
     const title = lang === 'en' ? l.titleEn : l.titleBn;
@@ -18,6 +29,29 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
 
   const activeSrc = activeIdx !== null && filtered[activeIdx] ? filtered[activeIdx].audioUrl : null;
   const activeLesson = activeIdx !== null ? filtered[activeIdx] : null;
+
+  if (!accessChecked) return null;
+
+  if (!hasAccess) {
+    return (
+      <div className="container" style={{ padding: '6rem 1rem', textAlign: 'center', maxWidth: '500px' }}>
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <Lock size={36} color="#dc2626" />
+        </div>
+        <h2 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '0.75rem' }}>
+          {lang === 'en' ? 'Access Restricted' : 'প্রবেশাধিকার নেই'}
+        </h2>
+        <p style={{ color: '#64748b', lineHeight: 1.7, marginBottom: '2rem' }}>
+          {lang === 'en'
+            ? 'Audio lessons are available to active members only. Please log in with an activated account or contact admin to activate your account.'
+            : 'অডিও লেসন শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে আপনার অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
+        </p>
+        <Link href="/auth" className="btn btn-blue" style={{ padding: '0.8rem 2.5rem', borderRadius: '30px' }}>
+          {lang === 'en' ? 'Login' : 'লগইন করুন'}
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="container" style={{ padding: '2rem 1rem' }}>
@@ -84,7 +118,6 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
                   boxShadow: isActive ? '0 4px 20px rgba(0,0,0,0.15)' : 'none'
                 }}
               >
-                {/* Track number / play icon */}
                 <div style={{
                   width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
                   background: isActive ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
@@ -94,7 +127,6 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
                   <Music size={18} color={isActive ? 'white' : '#64748b'} />
                 </div>
 
-                {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {lang === 'en' ? l.titleEn : l.titleBn}
@@ -109,7 +141,6 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
                   )}
                 </div>
 
-                {/* Duration */}
                 {l.duration && (
                   <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
                 )}

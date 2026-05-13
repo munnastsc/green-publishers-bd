@@ -17,11 +17,12 @@ export async function POST(request: Request) {
 
     // In a real app, we would set a JWT cookie here.
     // For this demo, we'll return user info and let the client handle session in localStorage.
-    return NextResponse.json({ 
-      id: user.id, 
-      email: user.email, 
-      name: user.name, 
-      role: user.role 
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      isActive: user.isActive,
     });
   } catch (error) {
     console.error(error);
