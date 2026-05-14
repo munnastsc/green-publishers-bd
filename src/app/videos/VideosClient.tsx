@@ -59,7 +59,7 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
       )}
       <div style={{ padding: '1rem' }}>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.3rem', color: '#1e293b', lineHeight: 1.4 }}>
-          {lang === 'en' ? v.titleEn : v.titleBn}
+          {lang === 'en' ? v.titleEn : (v.titleBn || v.titleEn)}
         </h3>
         {v.description && (
           <p style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -132,7 +132,7 @@ export default function VideosClient({ videos }: { videos: any[] }) {
 
   const filteredVideos = selectedGroup
     ? selectedGroup.videos.filter((v: any) => {
-        const title = lang === 'en' ? v.titleEn : v.titleBn;
+        const title = lang === 'en' ? v.titleEn : (v.titleBn || v.titleEn);
         return title.toLowerCase().includes(search.toLowerCase());
       })
     : [];

@@ -45,7 +45,7 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
 
   const filteredLessons = selectedGroup
     ? selectedGroup.lessons.filter((l: any) => {
-        const title = lang === 'en' ? l.titleEn : l.titleBn;
+        const title = lang === 'en' ? l.titleEn : (l.titleBn || l.titleEn);
         return title.toLowerCase().includes(search.toLowerCase());
       })
     : [];
@@ -192,7 +192,7 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
         <div style={{ position: 'sticky', top: '10px', zIndex: 50, marginBottom: '2rem' }}>
           <AudioPlayer
             src={activeSrc}
-            title={lang === 'en' ? activeLesson.titleEn : activeLesson.titleBn}
+            title={lang === 'en' ? activeLesson.titleEn : (activeLesson.titleBn || activeLesson.titleEn)}
             subtitle={selectedGroup.book ? (lang === 'en' ? selectedGroup.book.titleEn : selectedGroup.book.titleBn) : undefined}
             hasPrev={activeIdx > 0}
             hasNext={activeIdx < filteredLessons.length - 1}
