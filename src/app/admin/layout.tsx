@@ -42,6 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Home Sections', icon: <Layers size={18} />, href: '/admin/home-sections' },
     { label: 'Videos', icon: <Video size={18} />, href: '/admin/videos' },
     { label: 'Audio Lessons', icon: <Headphones size={18} />, href: '/admin/audio' },
+    { label: 'Units', icon: <Layers size={18} />, href: '/admin/units' },
     { label: 'শিক্ষা উপকরণ', icon: <BookMarked size={18} />, href: '/admin/educational-materials' },
     { label: 'প্রশিক্ষণ ম্যানুয়াল', icon: <FileText size={18} />, href: '/admin/training-manuals' },
     { label: 'Custom Pages', icon: <PanelLeft size={18} />, href: '/admin/custom-pages' },

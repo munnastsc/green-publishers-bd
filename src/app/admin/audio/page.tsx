@@ -3,26 +3,31 @@ import { useState, useEffect } from 'react';
 import { Headphones, Trash2, Music, ExternalLink, Pencil, X, Check } from 'lucide-react';
 import FileUpload from '@/components/admin/FileUpload';
 
-const BLANK = { titleEn: '', titleBn: '', audioUrl: '', duration: '', description: '', bookId: '', sortOrder: '0' };
+const BLANK = { titleEn: '', titleBn: '', audioUrl: '', duration: '', description: '', bookId: '', unitId: '', sortOrder: '0' };
 
 export default function AdminAudioPage() {
   const [lessons, setLessons] = useState<any[]>([]);
   const [books, setBooks] = useState<any[]>([]);
+  const [units, setUnits] = useState<any[]>([]);
   const [formData, setFormData] = useState(BLANK);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
-  useEffect(() => { fetchLessons(); fetchBooks(); }, []);
+  useEffect(() => { fetchLessons(); fetch('/api/books').then(r => r.json()).then(setBooks); }, []);
+
+  useEffect(() => {
+    if (formData.bookId) {
+      fetch(`/api/units?bookId=${formData.bookId}`).then(r => r.json()).then(setUnits);
+    } else {
+      setUnits([]);
+      setFormData(f => ({ ...f, unitId: '' }));
+    }
+  }, [formData.bookId]);
 
   const fetchLessons = async () => {
     const res = await fetch('/api/audio');
     if (res.ok) setLessons(await res.json());
-  };
-
-  const fetchBooks = async () => {
-    const res = await fetch('/api/books');
-    if (res.ok) setBooks(await res.json());
   };
 
   const showMsg = (t: string) => { setMsg(t); setTimeout(() => setMsg(''), 3000); };
@@ -44,7 +49,14 @@ export default function AdminAudioPage() {
 
   const handleEdit = (l: any) => {
     setEditingId(l.id);
-    setFormData({ titleEn: l.titleEn, titleBn: l.titleBn, audioUrl: l.audioUrl, duration: l.duration || '', description: l.description || '', bookId: l.bookId ? String(l.bookId) : '', sortOrder: String(l.sortOrder) });
+    setFormData({
+      titleEn: l.titleEn, titleBn: l.titleBn || '',
+      audioUrl: l.audioUrl, duration: l.duration || '',
+      description: l.description || '',
+      bookId: l.bookId ? String(l.bookId) : '',
+      unitId: l.unitId ? String(l.unitId) : '',
+      sortOrder: String(l.sortOrder)
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -55,7 +67,7 @@ export default function AdminAudioPage() {
   };
 
   const byBook = lessons.reduce((acc: any, l: any) => {
-    const key = l.book ? `${l.book.titleEn}` : 'General (No Book)';
+    const key = l.book ? l.book.titleEn : 'General (No Book)';
     if (!acc[key]) acc[key] = [];
     acc[key].push(l);
     return acc;
@@ -79,8 +91,8 @@ export default function AdminAudioPage() {
             <input required type="text" className="form-control" value={formData.titleEn} onChange={e => setFormData({ ...formData, titleEn: e.target.value })} placeholder="Chapter 1: Introduction" />
           </div>
           <div className="input-group">
-            <label className="input-label">Title (Bengali) *</label>
-            <input required type="text" className="form-control" value={formData.titleBn} onChange={e => setFormData({ ...formData, titleBn: e.target.value })} placeholder="অধ্যায় ১: ভূমিকা" />
+            <label className="input-label">Title (Bengali) — Optional</label>
+            <input type="text" className="form-control" value={formData.titleBn} onChange={e => setFormData({ ...formData, titleBn: e.target.value })} placeholder="অধ্যায় ১: ভূমিকা" />
           </div>
 
           <div style={{ gridColumn: '1 / -1' }}>
@@ -89,10 +101,21 @@ export default function AdminAudioPage() {
 
           <div className="input-group">
             <label className="input-label">Related Book (Optional)</label>
-            <select className="form-control" value={formData.bookId} onChange={e => setFormData({ ...formData, bookId: e.target.value })}>
+            <select className="form-control" value={formData.bookId} onChange={e => setFormData({ ...formData, bookId: e.target.value, unitId: '' })}>
               <option value="">General (Not linked to a book)</option>
               {books.map(b => <option key={b.id} value={b.id}>{b.titleEn} / {b.titleBn}</option>)}
             </select>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Unit (Optional){!formData.bookId && <span style={{ color: '#94a3b8', fontWeight: 400 }}> — বই সিলেক্ট করুন আগে</span>}</label>
+            <select className="form-control" value={formData.unitId} onChange={e => setFormData({ ...formData, unitId: e.target.value })} disabled={!formData.bookId || units.length === 0}>
+              <option value="">No Unit</option>
+              {units.map(u => <option key={u.id} value={u.id}>{u.titleEn}{u.titleBn ? ` / ${u.titleBn}` : ''}</option>)}
+            </select>
+            {formData.bookId && units.length === 0 && (
+              <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>এই বইতে কোনো unit নেই। <a href="/admin/units" style={{ color: 'var(--primary)' }}>Unit তৈরি করুন</a></p>
+            )}
           </div>
 
           <div className="input-group">
@@ -105,7 +128,7 @@ export default function AdminAudioPage() {
             <input type="number" className="form-control" value={formData.sortOrder} onChange={e => setFormData({ ...formData, sortOrder: e.target.value })} min="0" />
           </div>
 
-          <div className="input-group">
+          <div className="input-group" style={{ gridColumn: '1 / -1' }}>
             <label className="input-label">Description (Optional)</label>
             <input type="text" className="form-control" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
           </div>
@@ -145,7 +168,11 @@ export default function AdminAudioPage() {
                       </div>
                       <div>
                         <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{l.titleEn}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>{l.titleBn} {l.duration && `• ${l.duration}`}</div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                          {l.titleBn && <span>{l.titleBn} • </span>}
+                          {l.duration && <span>{l.duration}</span>}
+                          {l.unit && <span style={{ marginLeft: '0.4rem', background: '#fef3c7', color: '#92400e', padding: '1px 6px', borderRadius: '3px', fontSize: '0.72rem', fontWeight: 700 }}>📂 {l.unit.titleEn}</span>}
+                        </div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

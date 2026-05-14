@@ -238,11 +238,54 @@ export default function VideosClient({ videos }: { videos: any[] }) {
           <PlayCircle size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
           <h3>{lang === 'en' ? 'No videos found.' : 'কোনো ভিডিও পাওয়া যায়নি।'}</h3>
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-          {filteredVideos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
-        </div>
-      )}
+      ) : (() => {
+        const hasUnits = filteredVideos.some(v => v.unit);
+        if (!hasUnits) {
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+              {filteredVideos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
+            </div>
+          );
+        }
+        // Group by unit
+        const unitGroups: { unit: any | null; videos: any[] }[] = [];
+        const seenUnits = new Set<number | string>();
+        filteredVideos.forEach(v => {
+          const key = v.unit?.id ?? '__none__';
+          if (!seenUnits.has(key)) {
+            seenUnits.add(key);
+            unitGroups.push({ unit: v.unit ?? null, videos: [] });
+          }
+          unitGroups.find(g => (g.unit?.id ?? '__none__') === key)!.videos.push(v);
+        });
+        unitGroups.sort((a, b) => {
+          if (a.unit && !b.unit) return -1;
+          if (!a.unit && b.unit) return 1;
+          return (a.unit?.order ?? 0) - (b.unit?.order ?? 0);
+        });
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            {unitGroups.map((ug, i) => (
+              <div key={i}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem', paddingBottom: '0.6rem', borderBottom: '2px solid #e2e8f0' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'linear-gradient(135deg, #f59e0b, #ef4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <PlayCircle size={15} color="white" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>
+                      {ug.unit ? (lang === 'en' ? ug.unit.titleEn : (ug.unit.titleBn || ug.unit.titleEn)) : (lang === 'en' ? 'Other Videos' : 'অন্যান্য ভিডিও')}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{ug.videos.length} {lang === 'en' ? 'videos' : 'টি ভিডিও'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                  {ug.videos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }

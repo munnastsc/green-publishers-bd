@@ -65,11 +65,24 @@ model Book {
 
   videos        Video[]
   audioLessons  AudioLesson[]
+  units         Unit[]
   reviews       Review[]
   wishlistItems WishlistItem[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Unit {
+  id           Int           @id @default(autoincrement())
+  titleEn      String
+  titleBn      String?
+  order        Int           @default(0)
+  bookId       Int
+  book         Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  videos       Video[]
+  audioLessons AudioLesson[]
+  createdAt    DateTime      @default(now())
 }
 
 model Review {
@@ -109,13 +122,16 @@ model Coupon {
 model Video {
   id          Int      @id @default(autoincrement())
   titleEn     String
-  titleBn     String
+  titleBn     String?
   youtubeId   String
   description String?
-  
+
   bookId      Int?
   book        Book?    @relation(fields: [bookId], references: [id])
-  
+
+  unitId      Int?
+  unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
   categoryId  Int?
   createdAt   DateTime @default(now())
 }
@@ -177,7 +193,7 @@ model Banner {
 model AudioLesson {
   id          Int      @id @default(autoincrement())
   titleEn     String
-  titleBn     String
+  titleBn     String?
   audioUrl    String
   duration    String?
   description String?
@@ -185,6 +201,9 @@ model AudioLesson {
 
   bookId      Int?
   book        Book?    @relation(fields: [bookId], references: [id])
+
+  unitId      Int?
+  unit        Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
 
   createdAt   DateTime @default(now())
 }

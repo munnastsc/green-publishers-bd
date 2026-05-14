@@ -5,8 +5,11 @@ async function getAudioLessons() {
     const { PrismaClient } = await import('@prisma/client');
     const prisma = new PrismaClient();
     const lessons = await (prisma as any).audioLesson.findMany({
-      include: { book: { select: { id: true, titleEn: true, titleBn: true, imageUrl: true } } },
-      orderBy: [{ bookId: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }]
+      include: {
+        book: { select: { id: true, titleEn: true, titleBn: true, imageUrl: true } },
+        unit: true
+      },
+      orderBy: [{ bookId: 'asc' }, { unitId: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }]
     });
     await prisma.$disconnect();
     return lessons;

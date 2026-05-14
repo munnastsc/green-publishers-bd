@@ -3,40 +3,45 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   const lessons = await (prisma as any).audioLesson.findMany({
-    include: { book: { select: { id: true, titleEn: true, titleBn: true } } },
-    orderBy: [{ bookId: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }]
+    include: {
+      book: { select: { id: true, titleEn: true, titleBn: true } },
+      unit: true
+    },
+    orderBy: [{ bookId: 'asc' }, { unitId: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }]
   });
   return NextResponse.json(lessons);
 }
 
 export async function POST(req: NextRequest) {
-  const { titleEn, titleBn, audioUrl, duration, description, bookId, sortOrder } = await req.json();
+  const { titleEn, titleBn, audioUrl, duration, description, bookId, unitId, sortOrder } = await req.json();
   const lesson = await (prisma as any).audioLesson.create({
     data: {
       titleEn,
-      titleBn,
+      titleBn: titleBn || null,
       audioUrl,
       duration: duration || null,
       description: description || null,
       sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-      bookId: bookId ? parseInt(bookId) : null
+      bookId: bookId ? parseInt(bookId) : null,
+      unitId: unitId ? parseInt(unitId) : null,
     }
   });
   return NextResponse.json(lesson);
 }
 
 export async function PUT(req: NextRequest) {
-  const { id, titleEn, titleBn, audioUrl, duration, description, bookId, sortOrder } = await req.json();
+  const { id, titleEn, titleBn, audioUrl, duration, description, bookId, unitId, sortOrder } = await req.json();
   const lesson = await (prisma as any).audioLesson.update({
     where: { id: parseInt(id) },
     data: {
       titleEn,
-      titleBn,
+      titleBn: titleBn || null,
       audioUrl,
       duration: duration || null,
       description: description || null,
       sortOrder: sortOrder ? parseInt(sortOrder) : 0,
-      bookId: bookId ? parseInt(bookId) : null
+      bookId: bookId ? parseInt(bookId) : null,
+      unitId: unitId ? parseInt(unitId) : null,
     }
   });
   return NextResponse.json(lesson);

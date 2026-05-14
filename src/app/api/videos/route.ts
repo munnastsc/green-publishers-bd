@@ -3,9 +3,9 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const data = await prisma.video.findMany({ 
-      include: { book: true },
-      orderBy: { createdAt: 'desc' } 
+    const data = await prisma.video.findMany({
+      include: { book: true, unit: true },
+      orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json(data);
   } catch (error) {
@@ -16,16 +16,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { titleEn, titleBn, youtubeId, description, categoryId, bookId } = await request.json();
-    const result = await prisma.video.create({ 
-      data: { 
-        titleEn, 
-        titleBn, 
-        youtubeId, 
-        description, 
+    const { titleEn, titleBn, youtubeId, description, categoryId, bookId, unitId } = await request.json();
+    const result = await prisma.video.create({
+      data: {
+        titleEn,
+        titleBn: titleBn || null,
+        youtubeId,
+        description: description || null,
         categoryId: categoryId ? parseInt(categoryId) : null,
-        bookId: bookId ? parseInt(bookId) : null
-      } 
+        bookId: bookId ? parseInt(bookId) : null,
+        unitId: unitId ? parseInt(unitId) : null,
+      }
     });
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

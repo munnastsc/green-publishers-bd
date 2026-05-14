@@ -207,53 +207,94 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
           <Headphones size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
           <h3>{lang === 'en' ? 'No audio lessons found.' : 'কোনো অডিও লেসন পাওয়া যায়নি।'}</h3>
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-          {filteredLessons.map((l: any) => {
-            const isPlaying = hasAccess && activeId === l.id;
-            return (
-              <div
-                key={l.id}
-                onClick={() => handleClick(l)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '1rem',
-                  padding: '0.9rem 1.25rem',
-                  background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
-                  color: isPlaying ? 'white' : 'inherit',
-                  border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
-                  opacity: !hasAccess ? 0.75 : 1,
-                }}
-              >
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-                  background: isPlaying ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
-                }}>
-                  {!hasAccess ? <Lock size={15} color="#94a3b8" /> : <Music size={17} color={isPlaying ? 'white' : '#64748b'} />}
-                </div>
+      ) : (() => {
+        const hasUnits = filteredLessons.some((l: any) => l.unit);
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {lang === 'en' ? l.titleEn : l.titleBn}
-                  </div>
-                  {l.description && (
-                    <div style={{ fontSize: '0.76rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
-                  )}
+        const LessonRow = ({ l }: { l: any }) => {
+          const isPlaying = hasAccess && activeId === l.id;
+          return (
+            <div
+              onClick={() => handleClick(l)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '1rem',
+                padding: '0.9rem 1.25rem',
+                background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
+                color: isPlaying ? 'white' : 'inherit',
+                border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
+                borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s',
+                boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                opacity: !hasAccess ? 0.75 : 1,
+              }}
+            >
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
+                background: isPlaying ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
+              }}>
+                {!hasAccess ? <Lock size={15} color="#94a3b8" /> : <Music size={17} color={isPlaying ? 'white' : '#64748b'} />}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {lang === 'en' ? l.titleEn : (l.titleBn || l.titleEn)}
                 </div>
-
-                {l.duration && (
-                  <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
+                {l.description && (
+                  <div style={{ fontSize: '0.76rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
                 )}
               </div>
-            );
-          })}
-        </div>
-      )}
+              {l.duration && <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>}
+            </div>
+          );
+        };
+
+        if (!hasUnits) {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {filteredLessons.map((l: any) => <LessonRow key={l.id} l={l} />)}
+            </div>
+          );
+        }
+
+        // Group by unit
+        const unitGroups: { unit: any | null; lessons: any[] }[] = [];
+        const seenUnits = new Set<number | string>();
+        filteredLessons.forEach((l: any) => {
+          const key = l.unit?.id ?? '__none__';
+          if (!seenUnits.has(key)) {
+            seenUnits.add(key);
+            unitGroups.push({ unit: l.unit ?? null, lessons: [] });
+          }
+          unitGroups.find(g => (g.unit?.id ?? '__none__') === key)!.lessons.push(l);
+        });
+        unitGroups.sort((a, b) => {
+          if (a.unit && !b.unit) return -1;
+          if (!a.unit && b.unit) return 1;
+          return (a.unit?.order ?? 0) - (b.unit?.order ?? 0);
+        });
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            {unitGroups.map((ug, i) => (
+              <div key={i}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem', paddingBottom: '0.6rem', borderBottom: '2px solid #e2e8f0' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'linear-gradient(135deg, #f59e0b, #ef4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Headphones size={14} color="white" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1e293b' }}>
+                      {ug.unit ? (lang === 'en' ? ug.unit.titleEn : (ug.unit.titleBn || ug.unit.titleEn)) : (lang === 'en' ? 'Other Lessons' : 'অন্যান্য লেসন')}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{ug.lessons.length} {lang === 'en' ? 'lessons' : 'টি লেসন'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {ug.lessons.map((l: any) => <LessonRow key={l.id} l={l} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }
