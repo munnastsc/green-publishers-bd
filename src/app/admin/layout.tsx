@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        <nav style={{ flexGrow: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        <nav style={{ flexGrow: 1, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto' }}>
           {menuItems.map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'flex',
