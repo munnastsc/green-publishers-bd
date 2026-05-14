@@ -35,6 +35,27 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const { id, titleEn, titleBn, youtubeId, description, bookId, unitId } = await request.json();
+    const result = await prisma.video.update({
+      where: { id: parseInt(id) },
+      data: {
+        titleEn,
+        titleBn: titleBn || null,
+        youtubeId,
+        description: description || null,
+        bookId: bookId ? parseInt(bookId) : null,
+        unitId: unitId ? parseInt(unitId) : null,
+      }
+    });
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();
