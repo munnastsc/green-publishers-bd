@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Headphones, Music, Search, Lock, BookOpen } from 'lucide-react';
+import { Headphones, Music, Search, Lock, BookOpen, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import AudioPlayer from '@/components/AudioPlayer';
 import Link from 'next/link';
+
+type BookGroup = { book: any | null; lessons: any[] };
 
 export default function AudioClient({ lessons }: { lessons: any[] }) {
   const { lang } = useLanguage();
@@ -13,6 +15,7 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
   const [hasAccess, setHasAccess] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [showLockPopup, setShowLockPopup] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<BookGroup | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -23,84 +26,160 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
     setAccessChecked(true);
   }, []);
 
-  const filtered = lessons.filter((l: any) => {
-    const title = lang === 'en' ? l.titleEn : l.titleBn;
-    return title.toLowerCase().includes(search.toLowerCase());
-  });
-
-  // Group by book
-  const groups: { book: any | null; lessons: any[] }[] = [];
-  const seen = new Set<number | null>();
-  filtered.forEach(l => {
-    const bookId = l.book?.id ?? null;
-    if (!seen.has(bookId)) {
-      seen.add(bookId);
-      groups.push({ book: l.book ?? null, lessons: [] });
+  // Build book groups from all lessons
+  const bookGroups: BookGroup[] = [];
+  const seen = new Set<number | string>();
+  lessons.forEach(l => {
+    const key = l.book?.id ?? '__general__';
+    if (!seen.has(key)) {
+      seen.add(key);
+      bookGroups.push({ book: l.book ?? null, lessons: [] });
     }
-    groups.find(g => (g.book?.id ?? null) === bookId)!.lessons.push(l);
+    bookGroups.find(g => (g.book?.id ?? '__general__') === key)!.lessons.push(l);
   });
-  groups.sort((a, b) => {
+  bookGroups.sort((a, b) => {
     if (a.book && !b.book) return -1;
     if (!a.book && b.book) return 1;
     return 0;
   });
 
-  const activeLesson = activeId !== null ? filtered.find(l => l.id === activeId) ?? null : null;
-  const activeSrc = activeLesson?.audioUrl ?? null;
+  const filteredLessons = selectedGroup
+    ? selectedGroup.lessons.filter((l: any) => {
+        const title = lang === 'en' ? l.titleEn : l.titleBn;
+        return title.toLowerCase().includes(search.toLowerCase());
+      })
+    : [];
 
-  const flatFiltered = filtered;
-  const activeIdx = activeLesson ? flatFiltered.findIndex(l => l.id === activeId) : -1;
+  const activeLesson = activeId !== null ? filteredLessons.find(l => l.id === activeId) ?? null : null;
+  const activeSrc = activeLesson?.audioUrl ?? null;
+  const activeIdx = activeLesson ? filteredLessons.findIndex(l => l.id === activeId) : -1;
 
   const handleClick = (lesson: any) => {
     if (!hasAccess) { setShowLockPopup(true); return; }
     setActiveId(lesson.id);
   };
 
+  const LockPopup = () => (
+    <div onClick={() => setShowLockPopup(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+          <Lock size={28} color="#dc2626" />
+        </div>
+        <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem', color: '#1e293b' }}>
+          {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
+        </h3>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+          {lang === 'en'
+            ? 'Audio lessons are for active members only. Log in or contact admin to activate your account.'
+            : 'অডিও লেসন শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
+        </p>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+          <Link href="/auth" className="btn btn-blue" style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem' }}>
+            {lang === 'en' ? 'Login' : 'লগইন'}
+          </Link>
+          <button onClick={() => setShowLockPopup(false)} style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            {lang === 'en' ? 'Close' : 'বন্ধ করুন'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (!accessChecked) return null;
 
-  return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
-      {/* Lock Popup */}
-      {showLockPopup && (
-        <div onClick={() => setShowLockPopup(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '16px', padding: '2.5rem 2rem', maxWidth: '380px', width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-              <Lock size={28} color="#dc2626" />
-            </div>
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem', color: '#1e293b' }}>
-              {lang === 'en' ? 'Members Only' : 'শুধু সদস্যদের জন্য'}
-            </h3>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              {lang === 'en'
-                ? 'Audio lessons are for active members only. Log in or contact admin to activate your account.'
-                : 'অডিও লেসন শুধুমাত্র অ্যাক্টিভ সদস্যদের জন্য। লগইন করুন অথবা অ্যাডমিনকে অ্যাকাউন্ট অ্যাক্টিভ করতে বলুন।'}
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <Link href="/auth" className="btn btn-blue" style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem' }}>
-                {lang === 'en' ? 'Login' : 'লগইন'}
-              </Link>
-              <button onClick={() => setShowLockPopup(false)} style={{ padding: '0.6rem 1.5rem', borderRadius: '30px', fontSize: '0.9rem', background: '#f1f5f9', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-                {lang === 'en' ? 'Close' : 'বন্ধ করুন'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  // BOOK GRID VIEW
+  if (!selectedGroup) {
+    return (
+      <div className="container" style={{ padding: '2rem 1rem' }}>
+        {showLockPopup && <LockPopup />}
 
-      {/* Header */}
-      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
+        <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Headphones size={32} /> {lang === 'en' ? 'Audio Lessons' : 'অডিও লেসন'}
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            {filtered.length} {lang === 'en' ? 'lessons available' : 'টি লেসন পাওয়া যাচ্ছে'}
+            {lang === 'en' ? 'Select a book to listen to its lessons' : 'লেসন শুনতে একটি বই বেছে নিন'}
             {!hasAccess && (
               <span style={{ marginLeft: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#fef2f2', color: '#dc2626', padding: '2px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
                 <Lock size={12} /> {lang === 'en' ? 'Login to listen' : 'শুনতে লগইন করুন'}
               </span>
             )}
           </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '1.5rem' }}>
+          {bookGroups.map((group, i) => (
+            <div
+              key={i}
+              onClick={() => setSelectedGroup(group)}
+              style={{
+                cursor: 'pointer', background: 'white', borderRadius: '14px',
+                overflow: 'hidden', border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 28px rgba(0,0,0,0.13)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'none';
+              }}
+            >
+              {group.book?.imageUrl ? (
+                <img src={group.book.imageUrl} alt="" style={{ width: '100%', height: '190px', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '190px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={52} color="white" style={{ opacity: 0.65 }} />
+                </div>
+              )}
+              <div style={{ padding: '1rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b', lineHeight: 1.4, marginBottom: '0.4rem' }}>
+                  {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Lessons' : 'সাধারণ লেসন')}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <Headphones size={13} />
+                  {group.lessons.length} {lang === 'en' ? 'lessons' : 'টি লেসন'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // LESSONS FOR SELECTED BOOK
+  return (
+    <div className="container" style={{ padding: '2rem 1rem' }}>
+      {showLockPopup && <LockPopup />}
+
+      <button
+        onClick={() => { setSelectedGroup(null); setSearch(''); setActiveId(null); }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1.25rem', padding: '0.4rem 0' }}
+      >
+        <ArrowLeft size={16} /> {lang === 'en' ? 'All Books' : 'সব বই'}
+      </button>
+
+      {/* Header */}
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {selectedGroup.book?.imageUrl ? (
+            <img src={selectedGroup.book.imageUrl} alt="" style={{ width: '54px', height: '70px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+          ) : (
+            <div style={{ width: '54px', height: '70px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen size={26} color="white" />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: '1.8rem', color: 'var(--primary-dark)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Headphones size={28} />
+              {selectedGroup.book ? (lang === 'en' ? selectedGroup.book.titleEn : selectedGroup.book.titleBn) : (lang === 'en' ? 'General Lessons' : 'সাধারণ লেসন')}
+            </h1>
+            <p style={{ color: 'var(--text-muted)' }}>
+              {filteredLessons.length} {lang === 'en' ? 'lessons available' : 'টি লেসন পাওয়া যাচ্ছে'}
+            </p>
+          </div>
         </div>
         <div className="search-container" style={{ margin: 0, minWidth: '260px' }}>
           <input type="text" placeholder={lang === 'en' ? 'Search lessons...' : 'লেসন খুঁজুন...'} className="search-input" value={search} onChange={e => setSearch(e.target.value)} />
@@ -114,91 +193,65 @@ export default function AudioClient({ lessons }: { lessons: any[] }) {
           <AudioPlayer
             src={activeSrc}
             title={lang === 'en' ? activeLesson.titleEn : activeLesson.titleBn}
-            subtitle={activeLesson.book ? (lang === 'en' ? activeLesson.book.titleEn : activeLesson.book.titleBn) : undefined}
+            subtitle={selectedGroup.book ? (lang === 'en' ? selectedGroup.book.titleEn : selectedGroup.book.titleBn) : undefined}
             hasPrev={activeIdx > 0}
-            hasNext={activeIdx < flatFiltered.length - 1}
-            onPrev={() => { if (activeIdx > 0) setActiveId(flatFiltered[activeIdx - 1].id); }}
-            onNext={() => { if (activeIdx < flatFiltered.length - 1) setActiveId(flatFiltered[activeIdx + 1].id); }}
+            hasNext={activeIdx < filteredLessons.length - 1}
+            onPrev={() => { if (activeIdx > 0) setActiveId(filteredLessons[activeIdx - 1].id); }}
+            onNext={() => { if (activeIdx < filteredLessons.length - 1) setActiveId(filteredLessons[activeIdx + 1].id); }}
           />
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {filteredLessons.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
           <Headphones size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
           <h3>{lang === 'en' ? 'No audio lessons found.' : 'কোনো অডিও লেসন পাওয়া যায়নি।'}</h3>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          {groups.map((group, gi) => (
-            <div key={gi}>
-              {/* Book section header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '2px solid #e2e8f0' }}>
-                {group.book?.imageUrl ? (
-                  <img src={group.book.imageUrl} alt="" style={{ width: '42px', height: '56px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
-                ) : (
-                  <div style={{ width: '42px', height: '56px', borderRadius: '6px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BookOpen size={20} color="white" />
-                  </div>
-                )}
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e293b' }}>
-                    {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Lessons' : 'সাধারণ লেসন')}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                    {group.lessons.length} {lang === 'en' ? 'lessons' : 'টি লেসন'}
-                  </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {filteredLessons.map((l: any) => {
+            const isPlaying = hasAccess && activeId === l.id;
+            return (
+              <div
+                key={l.id}
+                onClick={() => handleClick(l)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '1rem',
+                  padding: '0.9rem 1.25rem',
+                  background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
+                  color: isPlaying ? 'white' : 'inherit',
+                  border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
+                  opacity: !hasAccess ? 0.75 : 1,
+                }}
+              >
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
+                  background: isPlaying ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
+                }}>
+                  {!hasAccess ? <Lock size={15} color="#94a3b8" /> : <Music size={17} color={isPlaying ? 'white' : '#64748b'} />}
                 </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {lang === 'en' ? l.titleEn : l.titleBn}
+                  </div>
+                  {l.description && (
+                    <div style={{ fontSize: '0.76rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
+                  )}
+                </div>
+
+                {l.duration && (
+                  <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
+                )}
               </div>
-
-              {/* Lessons list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {group.lessons.map((l: any) => {
-                  const isPlaying = hasAccess && activeId === l.id;
-                  return (
-                    <div
-                      key={l.id}
-                      onClick={() => handleClick(l)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '1rem',
-                        padding: '0.9rem 1.25rem',
-                        background: isPlaying ? 'linear-gradient(135deg, #1e293b, #0f172a)' : 'white',
-                        color: isPlaying ? 'white' : 'inherit',
-                        border: `1px solid ${isPlaying ? '#334155' : '#e2e8f0'}`,
-                        borderRadius: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: isPlaying ? '0 4px 20px rgba(0,0,0,0.15)' : 'none',
-                        opacity: !hasAccess ? 0.75 : 1,
-                      }}
-                    >
-                      <div style={{
-                        width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-                        background: isPlaying ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : '#f1f5f9',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: isPlaying ? '0 2px 8px rgba(245,158,11,0.4)' : 'none'
-                      }}>
-                        {!hasAccess ? <Lock size={15} color="#94a3b8" /> : <Music size={17} color={isPlaying ? 'white' : '#64748b'} />}
-                      </div>
-
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.92rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {lang === 'en' ? l.titleEn : l.titleBn}
-                        </div>
-                        {l.description && (
-                          <div style={{ fontSize: '0.76rem', opacity: 0.6, marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.description}</div>
-                        )}
-                      </div>
-
-                      {l.duration && (
-                        <div style={{ fontSize: '0.8rem', opacity: 0.65, flexShrink: 0 }}>{l.duration}</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

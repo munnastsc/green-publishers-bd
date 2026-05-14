@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Search, PlayCircle, Lock, BookOpen } from 'lucide-react';
+import { Search, PlayCircle, Lock, BookOpen, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 
@@ -95,11 +95,14 @@ function VideoCard({ v, lang, hasAccess }: { v: any, lang: string, hasAccess: bo
   );
 }
 
+type BookGroup = { book: any | null; videos: any[] };
+
 export default function VideosClient({ videos }: { videos: any[] }) {
   const { lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [hasAccess, setHasAccess] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<BookGroup | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('user');
@@ -110,42 +113,42 @@ export default function VideosClient({ videos }: { videos: any[] }) {
     setAccessChecked(true);
   }, []);
 
-  const filtered = videos.filter((v: any) => {
-    const title = lang === 'en' ? v.titleEn : v.titleBn;
-    return title.toLowerCase().includes(search.toLowerCase());
-  });
-
-  // Group by book
-  const groups: { book: any | null; videos: any[] }[] = [];
-  const seen = new Set<number | null>();
-
-  filtered.forEach(v => {
-    const bookId = v.book?.id ?? null;
-    if (!seen.has(bookId)) {
-      seen.add(bookId);
-      groups.push({ book: v.book ?? null, videos: [] });
+  // Build book groups from all videos
+  const bookGroups: BookGroup[] = [];
+  const seen = new Set<number | string>();
+  videos.forEach(v => {
+    const key = v.book?.id ?? '__general__';
+    if (!seen.has(key)) {
+      seen.add(key);
+      bookGroups.push({ book: v.book ?? null, videos: [] });
     }
-    groups.find(g => (g.book?.id ?? null) === bookId)!.videos.push(v);
+    bookGroups.find(g => (g.book?.id ?? '__general__') === key)!.videos.push(v);
   });
-
-  // Sort: books first, no-book last
-  groups.sort((a, b) => {
+  bookGroups.sort((a, b) => {
     if (a.book && !b.book) return -1;
     if (!a.book && b.book) return 1;
     return 0;
   });
 
+  const filteredVideos = selectedGroup
+    ? selectedGroup.videos.filter((v: any) => {
+        const title = lang === 'en' ? v.titleEn : v.titleBn;
+        return title.toLowerCase().includes(search.toLowerCase());
+      })
+    : [];
+
   if (!accessChecked) return null;
 
-  return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', marginBottom: '0.25rem' }}>
-            {lang === 'en' ? 'Video Lessons' : 'ভিডিও ক্লাস'}
+  // BOOK GRID VIEW
+  if (!selectedGroup) {
+    return (
+      <div className="container" style={{ padding: '2rem 1rem' }}>
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ fontSize: '2rem', color: 'var(--primary-dark)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <PlayCircle size={32} /> {lang === 'en' ? 'Video Lessons' : 'ভিডিও ক্লাস'}
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            {lang === 'en' ? `${filtered.length} videos` : `${filtered.length}টি ভিডিও`}
+            {lang === 'en' ? 'Select a book to view its videos' : 'ভিডিও দেখতে একটি বই বেছে নিন'}
             {!hasAccess && (
               <span style={{ marginLeft: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: '#fef2f2', color: '#dc2626', padding: '2px 10px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>
                 <Lock size={12} /> {lang === 'en' ? 'Login to watch' : 'দেখতে লগইন করুন'}
@@ -153,45 +156,91 @@ export default function VideosClient({ videos }: { videos: any[] }) {
             )}
           </p>
         </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '1.5rem' }}>
+          {bookGroups.map((group, i) => (
+            <div
+              key={i}
+              onClick={() => setSelectedGroup(group)}
+              style={{
+                cursor: 'pointer', background: 'white', borderRadius: '14px',
+                overflow: 'hidden', border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 28px rgba(0,0,0,0.13)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'none';
+              }}
+            >
+              {group.book?.imageUrl ? (
+                <img src={group.book.imageUrl} alt="" style={{ width: '100%', height: '190px', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '190px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BookOpen size={52} color="white" style={{ opacity: 0.65 }} />
+                </div>
+              )}
+              <div style={{ padding: '1rem' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1e293b', lineHeight: 1.4, marginBottom: '0.4rem' }}>
+                  {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Videos' : 'সাধারণ ভিডিও')}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                  <PlayCircle size={13} />
+                  {group.videos.length} {lang === 'en' ? 'videos' : 'টি ভিডিও'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // VIDEOS FOR SELECTED BOOK
+  return (
+    <div className="container" style={{ padding: '2rem 1rem' }}>
+      <button
+        onClick={() => { setSelectedGroup(null); setSearch(''); }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1.25rem', padding: '0.4rem 0' }}
+      >
+        <ArrowLeft size={16} /> {lang === 'en' ? 'All Books' : 'সব বই'}
+      </button>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {selectedGroup.book?.imageUrl ? (
+            <img src={selectedGroup.book.imageUrl} alt="" style={{ width: '54px', height: '70px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+          ) : (
+            <div style={{ width: '54px', height: '70px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <BookOpen size={26} color="white" />
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontSize: '1.8rem', color: 'var(--primary-dark)', marginBottom: '0.2rem' }}>
+              {selectedGroup.book ? (lang === 'en' ? selectedGroup.book.titleEn : selectedGroup.book.titleBn) : (lang === 'en' ? 'General Videos' : 'সাধারণ ভিডিও')}
+            </h1>
+            <p style={{ color: 'var(--text-muted)' }}>
+              {filteredVideos.length} {lang === 'en' ? 'videos' : 'টি ভিডিও'}
+            </p>
+          </div>
+        </div>
         <div className="search-container" style={{ margin: 0, minWidth: '260px' }}>
           <input type="text" placeholder={lang === 'en' ? 'Search videos...' : 'ভিডিও খুঁজুন...'} className="search-input" value={search} onChange={e => setSearch(e.target.value)} />
           <button className="search-btn"><Search size={18} /></button>
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {filteredVideos.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
           <PlayCircle size={64} style={{ marginBottom: '1rem', opacity: 0.2 }} />
           <h3>{lang === 'en' ? 'No videos found.' : 'কোনো ভিডিও পাওয়া যায়নি।'}</h3>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          {groups.map((group, gi) => (
-            <div key={gi}>
-              {/* Book section header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '2px solid #e2e8f0' }}>
-                {group.book?.imageUrl ? (
-                  <img src={group.book.imageUrl} alt="" style={{ width: '42px', height: '56px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }} />
-                ) : (
-                  <div style={{ width: '42px', height: '56px', borderRadius: '6px', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BookOpen size={20} color="white" />
-                  </div>
-                )}
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#1e293b' }}>
-                    {group.book ? (lang === 'en' ? group.book.titleEn : group.book.titleBn) : (lang === 'en' ? 'General Videos' : 'সাধারণ ভিডিও')}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                    {group.videos.length} {lang === 'en' ? 'videos' : 'টি ভিডিও'}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
-                {group.videos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
-              </div>
-            </div>
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+          {filteredVideos.map(v => <VideoCard key={v.id} v={v} lang={lang} hasAccess={hasAccess} />)}
         </div>
       )}
     </div>
